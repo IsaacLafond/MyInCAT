@@ -1,0 +1,20 @@
+# R history files
+.Rhistory
+.RData
+.Ruserdata
+
+# RStudio files (if ever used)
+.Rproj.user/
+*.Rproj
+
+# any file in data dir
+data/*
+
+# Large data objects
+*.rds
+*.RData
+*.h5Seurat
+
+# Shiny logs
+rsconnect/
+logs/
