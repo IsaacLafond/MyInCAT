@@ -1,83 +1,87 @@
-FROM rocker/shiny:4.3.2
+FROM rocker/r-ver:4.3.2
 
 # -----------------------------
 # System dependencies
 # -----------------------------
-RUN apt-get update && apt-get install -y \
-    libxml2-dev \
-    libssl-dev \
-    libcurl4-openssl-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    libudunits2-dev \
-    libgdal-dev \
-    libgeos-dev \
-    libproj-dev \
-    libfftw3-dev \
-    libglpk-dev \
-    libgit2-dev \
-    cmake \
-    build-essential \
-    && apt-get clean
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    zlib1g-dev \
+    pkg-config \
+  && rm -rf /var/lib/apt/lists/*
+#     libxml2-dev \
+#     libssl-dev \
+#     libcurl4-openssl-dev \
+#     libharfbuzz-dev \
+#     libfribidi-dev \
+#     libfreetype6-dev \
+#     libpng-dev \
+#     libtiff5-dev \
+#     libjpeg-dev \
+#     libudunits2-dev \
+#     libgdal-dev \
+#     libgeos-dev \
+#     libproj-dev \
+#     libfftw3-dev \
+#     libglpk-dev \
+#     libgit2-dev \
+#     cmake \
+#     build-essential \
+#     && apt-get clean
 
 # -----------------------------
 # Install required R packages
 # -----------------------------
 
+# install shiny
+RUN R -e "options(warn=2); install.packages(c('shiny'))"
+
+
 # CRAN first
-RUN R -e "install.packages(c( \
-    'Seurat', 'tidyverse', 'ggplot2', 'devtools',\
-    'gridExtra', 'harmony', 'NMF', 'circlize', 'msigdbr' \
-))"
+# RUN R -e "install.packages(c( \
+#     'Seurat', 'tidyverse', 'ggplot2', 'devtools',\
+#     'gridExtra', 'harmony', 'NMF', 'circlize', 'msigdbr' \
+# ))"
 
 
 # Bioconductor packages
-RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
+# RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
 
-RUN R -e "BiocManager::install(c( \
-  'Biobase','BiocGenerics','AnnotationDbi','org.Mm.eg.db', \
-  'monocle3', 'clusterProfiler','ComplexHeatmap' \
-))"
+# RUN R -e "BiocManager::install(c( \
+#   'Biobase','BiocGenerics','AnnotationDbi','org.Mm.eg.db', \
+#   'monocle3', 'clusterProfiler','ComplexHeatmap' \
+# ))"
 
 # Monocle3 installation
-RUN R -e "BiocManager::install(c( \
-  'DelayedArray', 'DelayedMatrixStats', 'ggrastr', \
-  'limma', 'lme4', 'S4Vectors', 'SingleCellExperiment', \
-  'SummarizedExperiment', 'batchelor', 'HDF5Array', \
-))"
+# RUN R -e "BiocManager::install(c( \
+#   'DelayedArray', 'DelayedMatrixStats', 'ggrastr', \
+#   'limma', 'lme4', 'S4Vectors', 'SingleCellExperiment', \
+#   'SummarizedExperiment', 'batchelor', 'HDF5Array', \
+# ))"
 
-RUN R -e "remotes::install_github('bnprks/BPCells/r')"
+# RUN R -e "remotes::install_github('bnprks/BPCells/r')"
 
-RUN R -e "devtools::install_github('cole-trapnell-lab/monocle3')"
+# RUN R -e "devtools::install_github('cole-trapnell-lab/monocle3')"
 
 
 # Install SeuratWrappers + CellChat (GitHub / Bioc)
-RUN R -e "remotes::install_github('satijalab/seurat-wrappers')"
+# RUN R -e "remotes::install_github('satijalab/seurat-wrappers')"
 
-RUN R -e "devtools::install_github('sqjin/CellChat')"
+# RUN R -e "devtools::install_github('sqjin/CellChat')"
 
 # -----------------------------
-# Copy your Shiny app
+# Copy Shiny app/set working dir
 # -----------------------------
-# /srv/shiny-server/ is where Shiny Server looks for apps
-COPY . /srv/shiny-server/app
+WORKDIR /app
+COPY . /app
 
 # -----------------------------
 # Expose port & run
 # -----------------------------
 EXPOSE 3838
 
-# Allow to drop into R console OR run shiny server
-CMD ["/init"]
+CMD ["R", "-e", "shiny::runApp('/app', host='0.0.0.0', port=3838)"]
 
 # Broken packages:
     # Need BPCells?
     # SeuratWrappers
     # monocle3
     # CellChat
-
-# docker run -p 3838:3838 -d --platform linux/amd64 -v /Users/isaaclafond/Projects/MyInCAT/data:/srv/shiny-server/app/data test
