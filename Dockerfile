@@ -43,8 +43,20 @@ RUN R -e "BiocManager::install(c( \
   'monocle3', 'clusterProfiler','ComplexHeatmap' \
 ))"
 
+# Monocle3 installation
+RUN R -e "BiocManager::install(c( \
+  'DelayedArray', 'DelayedMatrixStats', 'ggrastr', \
+  'limma', 'lme4', 'S4Vectors', 'SingleCellExperiment', \
+  'SummarizedExperiment', 'batchelor', 'HDF5Array', \
+))"
+
+RUN R -e "remotes::install_github('bnprks/BPCells/r')"
+
+RUN R -e "devtools::install_github('cole-trapnell-lab/monocle3')"
+
+
 # Install SeuratWrappers + CellChat (GitHub / Bioc)
-RUN R -e "devtools::install_github('satijalab/seurat-wrappers')"
+RUN R -e "remotes::install_github('satijalab/seurat-wrappers')"
 
 RUN R -e "devtools::install_github('sqjin/CellChat')"
 
@@ -61,3 +73,11 @@ EXPOSE 3838
 
 # Allow to drop into R console OR run shiny server
 CMD ["/init"]
+
+# Broken packages:
+    # Need BPCells?
+    # SeuratWrappers
+    # monocle3
+    # CellChat
+
+# docker run -p 3838:3838 -d --platform linux/amd64 -v /Users/isaaclafond/Projects/MyInCAT/data:/srv/shiny-server/app/data test
