@@ -71,7 +71,7 @@ RUN R -e "options(warn=2); install.packages(c('shiny'))"
 # Copy Shiny app/set working dir
 # -----------------------------
 WORKDIR /app
-COPY . /app
+# COPY . /app # commented in favor of volume for hot realoads during dev. Remove for deployment to bake with final files.
 
 # -----------------------------
 # Expose port & run
