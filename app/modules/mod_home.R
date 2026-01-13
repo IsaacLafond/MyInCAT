@@ -5,9 +5,9 @@ mod_home_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    h2("Home"),
+    h2("Welcome to MyInCAT!"),
     p("This is the home page tab."),
-    p("You can put general information, instructions, or summaries here.")
+    p("General information, instructions, or summaries/video here.")
   )
 }
 
