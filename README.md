@@ -11,7 +11,7 @@ data: folder holding all the data objects/datasets used by the app.
 
 Dev run command:
 1. docker build -t shiny-dev
-2. docker run --rm -it \
+2. docker run --rm -itd \
     -p 3838:3838 \
     -v "$(pwd)/app:/app" \
     shiny-dev
