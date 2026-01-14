@@ -37,31 +37,21 @@ mod_umap_ui <- function(id) {
           ns("group_by"),
           "Group by:",
           choices = names(choices_data)
-          # c("cluster", "subcluster", "orig.ident", "experiment")
         ),
         # Placeholder for dynamic checkboxes
-        uiOutput(ns("checkboxes_output"))
+        uiOutput(ns("checkboxes_output")),
 
-        # checkboxInput("cluster1", "Cluster 1"),
-        # checkboxInput("cluster2", "Cluster 2"),
-        # checkboxInput("cluster3", "Cluster 3"),
-        # checkboxInput("cluster4", "Cluster 4"),
-        # checkboxInput("cluster5", "Cluster 5")
-
-        # selectInput(
-        #   ns("group_by"),
-        #   "Group by:",
-        #   c("cluster", "subcluster", "orig.ident", "experiment")
-
-        # ),
-        ,open = "always"
+        open = "always"
       ),
 
       # Output: UMAP
       plotOutput(ns("umapPlot"))
     ),
 
-    sidebar = sidebar(umap_code(), position = "right")
+    # Output: Metadata table
+    tableOutput(ns("meta_table")),
+
+    sidebar = sidebar(umap_code(), position = "right", fillable = TRUE, open = "closed")
   )
 }
 
@@ -93,6 +83,16 @@ mod_umap_server <- function(id) {
     output$umapPlot <- renderPlot({
       hist(rnorm(100))
     })
+
+    # Populate placeholder metadata table
+    output$meta_table <- renderTable({
+      data.frame(
+        SampleID = 1:10,
+        Metadata = sample(LETTERS, 10)
+      )
+    },
+    # striped = TRUE,
+    bordered = TRUE)
 
   })
 }
