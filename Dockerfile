@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -----------------------------
 
 # install shiny
-RUN R -e "options(warn=2); install.packages(c('shiny'))"
+RUN R -e "options(warn=2); install.packages(c('shiny', 'colourpicker'))"
 
 
 # CRAN first
