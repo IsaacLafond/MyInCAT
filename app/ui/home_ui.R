@@ -13,7 +13,7 @@ home_ui <- function() {
       style = ""
     ),
 
-    p("General information, instructions, or summaries/video here."),
+    p("For a tutorial on how to use CachexiaSC, please watch this video!"),
 
     tags$iframe(
       src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",

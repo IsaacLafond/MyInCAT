@@ -1,15 +1,18 @@
 library(shiny)
 library(bslib)
+library(colourpicker)
 
 # Hist Demo App modules
 source("modules/mod_histogram.R")
 
 # UI app modules
+source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
 
 # UI components
 source("ui/home_ui.R")
 source("ui/coming_soon.R")
+source("ui/color_picker.R")
 source("ui/umap_code.R")
 
 # Set static resource path to www directory
@@ -17,7 +20,10 @@ addResourcePath(prefix = "www", directoryPath = "www")
 
 
 ui <- page_fillable(
-  # theme = ___
+  theme = bs_theme(
+    version = 5,
+    # preset = "minty"
+  ),
 
   page_navbar(
     window_title = "MyInCAT",
@@ -32,6 +38,15 @@ ui <- page_fillable(
     title = tags$a(
       href = "/",
       tags$img(src = "www/logo.png", height = "30px")
+    ),
+
+    sidebar = sidebar(
+      title = "Options",
+      position = "right",
+      fillable = TRUE,
+      fill = TRUE,
+      # content:
+      mod_subset_sidebar_ui("subset_sidebar")
     ),
 
     # Home tab
@@ -67,9 +82,9 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
-  # mod_home_server("home") # nolint
-  mod_histogram_server("hist") # nolint
-  mod_umap_server("umap") # nolint
+  sidebar_data <- mod_subset_sidebar_server("subset_sidebar")
+  mod_histogram_server("hist")
+  mod_umap_server("umap", sidebar_data)
 }
 
 shinyApp(ui = ui, server = server)

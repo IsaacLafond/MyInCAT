@@ -1,3 +1,8 @@
 code {
     overflow: scroll;
 }
+
+.colourpicker-panel {
+    right: 0 !important;
+    left: auto !important;
+}
