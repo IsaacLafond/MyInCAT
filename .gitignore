@@ -8,7 +8,7 @@
 *.Rproj
 
 # any file in data dir
-data/*
+app/data/*
 
 # Large data objects
 *.rds

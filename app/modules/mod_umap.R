@@ -9,7 +9,7 @@ mod_umap_ui <- function(id) {
     selectInput(
       ns("group_by"),
       "Group by:",
-      choices = names(choices_data)
+      choices = names(groupby_choices)
     ),
 
     # Output: UMAP
@@ -39,12 +39,27 @@ mod_umap_ui <- function(id) {
 # -------------------------
 # UMAP server
 # -------------------------
-mod_umap_server <- function(id, sidebar_selections) {
+mod_umap_server <- function(id, sidebar_selections, sc_combined_tier1) {
   moduleServer(id, function(input, output, session) {
 
     # Populate placeholder UMAP plot
     output$umapPlot <- renderPlot({
-      hist(rnorm(100))
+      group_val <- groupby_choices[[input$group_by]]
+
+      DimPlot(
+        sc_combined_tier1,
+        reduction = "umap",
+        group.by = group_val,
+        repel = TRUE,
+        pt.size = 1
+      ) +
+      ggplot2::labs(title = "", x = "UMAP1", y = "UMAP2") +
+      theme(
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank()
+      )
+
     })
 
     # Populate placeholder metadata table
@@ -58,12 +73,6 @@ mod_umap_server <- function(id, sidebar_selections) {
         Metadata = sample(LETTERS, 10)
       )}
     )
-
-    # Debugging output
-    # show group by selection in verbatim text and subset choices from subset sidebar
-    output$debug_group_by <- renderPrint({
-      sidebar_selections()
-    })
 
   })
 }
