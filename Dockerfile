@@ -4,25 +4,34 @@ FROM rocker/r-ver:4.3.2
 # System dependencies
 # -----------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    # helpful tools
+    # pkg-config \
+    # shiny system dependencies
     zlib1g-dev \
-    pkg-config \
+    # devtools/remotes system dependencies
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libfontconfig1-dev \
+    libssl-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    libgit2-dev \
+    # Seurat dependencies
+    libglpk-dev \
+    # hdf5r dependencies
+    # patch \
+    # Seurat disk dependencies
+    # libhdf5-dev \
   && rm -rf /var/lib/apt/lists/*
-#     libxml2-dev \
-#     libssl-dev \
-#     libcurl4-openssl-dev \
-#     libharfbuzz-dev \
-#     libfribidi-dev \
-#     libfreetype6-dev \
-#     libpng-dev \
-#     libtiff5-dev \
-#     libjpeg-dev \
 #     libudunits2-dev \
 #     libgdal-dev \
 #     libgeos-dev \
 #     libproj-dev \
 #     libfftw3-dev \
-#     libglpk-dev \
-#     libgit2-dev \
 #     cmake \
 #     build-essential \
 #     && apt-get clean
@@ -31,14 +40,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install required R packages
 # -----------------------------
 
-# install shiny
+# install shiny/UI packages
 RUN R -e "options(warn=2); install.packages(c('shiny', 'colourpicker'))"
 
+# Install devtools and remote for GitHub installs
+RUN R -e "options(warn=2); install.packages(c('devtools', 'remotes'))"
+
+# Install Seurat
+RUN R -e "options(warn=2); install.packages('Seurat')"
+
+# Install Seurat disk
+# RUN R -e "options(warn=2); install.packages('hdf5r')"
+# RUN R -e "options(warn=2); remotes::install_github('mojaveazure/seurat-disk')"
 
 # CRAN first
 # RUN R -e "install.packages(c( \
-#     'Seurat', 'tidyverse', 'ggplot2', 'devtools',\
-#     'gridExtra', 'harmony', 'NMF', 'circlize', 'msigdbr' \
+#     'Seurat', 'tidyverse', 'ggplot2', 'gridExtra',\
+#     'harmony', 'NMF', 'circlize', 'msigdbr' \
 # ))"
 
 
