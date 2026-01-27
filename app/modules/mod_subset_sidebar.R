@@ -28,48 +28,50 @@ choices_data <- list(
 mod_subset_sidebar_ui <- function(id) {
   ns <- NS(id)
 
-  accordion(
-    accordion_panel(
-      title = "Subset Options",
-      tagList(
-        selectizeInput(
-          ns("clusters"),
-          label = "Clusters:",
-          choices = choices_data$cluster,
-          multiple = TRUE
-        ),
-        div(id = ns("cluster_container")),
-
-        selectizeInput(
-          ns("subclusters"),
-          label = "Subclusters:",
-          choices = choices_data$subcluster,
-          multiple = TRUE
-        ),
-        div(id = ns("subcluster_container")),
-
-        selectizeInput( # AKA orig.ident
-          ns("samples"),
-          label = "Samples:",
-          choices = choices_data$orig.ident,
-          multiple = TRUE
-        ),
-        div(id = ns("sample_container")),
-
-        selectizeInput(
-          ns("experiments"),
-          label = "Experiments:",
-          choices = choices_data$experiment,
-          multiple = TRUE
-        ),
-        div(id = ns("experiment_container"))
-      )
-    ),
-
+  page_fillable(
+    accordion(
       accordion_panel(
-        title = "Download Options",
-        p("Download options here")
+        title = "Subset Options",
+        tagList(
+          selectizeInput(
+            ns("clusters"),
+            label = "Clusters:",
+            choices = choices_data$cluster,
+            multiple = TRUE
+          ),
+          div(id = ns("cluster_container")),
+
+          selectizeInput(
+            ns("subclusters"),
+            label = "Subclusters:",
+            choices = choices_data$subcluster,
+            multiple = TRUE
+          ),
+          div(id = ns("subcluster_container")),
+
+          selectizeInput( # AKA orig.ident
+            ns("samples"),
+            label = "Samples:",
+            choices = choices_data$orig.ident,
+            multiple = TRUE
+          ),
+          div(id = ns("sample_container")),
+
+          selectizeInput(
+            ns("experiments"),
+            label = "Experiments:",
+            choices = choices_data$experiment,
+            multiple = TRUE
+          ),
+          div(id = ns("experiment_container"))
+        )
       ),
+
+        accordion_panel(
+          title = "Download Options",
+          p("Download options here")
+        ),
+    )
   )
 }
 
@@ -81,81 +83,55 @@ mod_subset_sidebar_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Helper function to manage dynamic UI additions/removals
-    manage_pickers <- function(current_vals, previous_vals, prefix, container_id) {
-      # 1. Find which ones to add
-      to_add <- setdiff(current_vals, previous_vals)
-      for (item in to_add) {
-        insertUI(
-          selector = paste0("#", ns(container_id)),
-          where = "beforeEnd",
-          ui = div(
-            id = ns(paste0("wrapper_", prefix, "_", item)),
-            color_picker_ui(ns(paste0("color_picker_", prefix, "_", item)), label = item)
-          )
-        )
-      }
+    # 1. Define the categories we want to manage
+    categories <- list(
+      "cluster"     = "cluster_container",
+      "subcluster"  = "subcluster_container",
+      "sample"      = "sample_container",
+      "experiment"  = "experiment_container"
+    )
+
+    # 2. Create a list of reactiveVals to track the 'previous' state for each category
+    # We use 'setNames' to create: list(cluster = reactiveVal(NULL), ...)
+    prev_states <- lapply(setNames(names(categories), names(categories)), function(x) reactiveVal(NULL))
+
+    # 3. The Management Loop
+    # We use 'lapply' over the names to create an observer for each category
+    lapply(names(categories), function(cat_name) {
       
-      # 2. Find which ones to remove
-      to_remove <- setdiff(previous_vals, current_vals)
-      for (item in to_remove) {
-        removeUI(selector = paste0("#", ns(paste0("wrapper_", prefix, "_", item))))
-      }
-    }
+      # Determine the input ID (e.g., input$clusters, input$subclusters)
+      # Note: Your UI IDs use plural (clusters), so we append 's'
+      input_id <- paste0(cat_name, "s") 
+      container_id <- categories[[cat_name]]
 
-    # ReactiveVal to keep track of previous states
-    prev_clusters <- reactiveVal(NULL)
-    observeEvent(input$clusters, ignoreNULL = FALSE, {
-      manage_pickers(input$clusters, prev_clusters(), "cluster", "cluster_container")
-      prev_clusters(input$clusters)
+      observeEvent(input[[input_id]], ignoreNULL = FALSE, {
+        current_vals  <- input[[input_id]]
+        previous_vals <- prev_states[[cat_name]]()
+        
+        # --- Manage Additions ---
+        to_add <- setdiff(current_vals, previous_vals)
+        for (item in to_add) {
+          insertUI(
+            selector = paste0("#", ns(container_id)),
+            where = "beforeEnd",
+            ui = div(
+              id = ns(paste0("wrapper_", cat_name, "_", item)),
+              # Your color_picker_ui function
+              color_picker_ui(ns(paste0("color_picker_", cat_name, "_", item)), label = item)
+            )
+          )
+        }
+        
+        # --- Manage Removals ---
+        to_remove <- setdiff(previous_vals, current_vals)
+        for (item in to_remove) {
+          removeUI(selector = paste0("#", ns(paste0("wrapper_", cat_name, "_", item))))
+        }
+        
+        # Update the state tracker
+        prev_states[[cat_name]](current_vals)
+      })
     })
-    
-    prev_subclusters <- reactiveVal(NULL)
-    observeEvent(input$subclusters, ignoreNULL = FALSE, {
-      manage_pickers(input$subclusters, prev_subclusters(), "subcluster", "subcluster_container")
-      prev_subclusters(input$subclusters)
-    })
-
-    prev_samples <- reactiveVal(NULL)
-    observeEvent(input$samples, ignoreNULL = FALSE, {
-      manage_pickers(input$samples, prev_samples(), "sample", "sample_container")
-      prev_samples(input$samples)
-    })
-
-    prev_experiments <- reactiveVal(NULL)
-    observeEvent(input$experiments, ignoreNULL = FALSE, {
-      manage_pickers(input$experiments, prev_experiments(), "experiment", "experiment_container")
-      prev_experiments(input$experiments)
-    })
-
-    # # add a color picker for each selected cluster
-    # output$cluster_color_pickers <- renderUI({
-    #   req(input$clusters) # Ensure clusters are selected
-    #   lapply(input$clusters, function(cluster) {
-    #     color_picker_ui(session$ns(paste0("color_picker_cluster_", cluster)), label = cluster)
-    #   })
-    # })
-    # # add a color picker for each selected subcluster
-    # output$subcluster_color_pickers <- renderUI({
-    #   req(input$subclusters) # Ensure subclusters are selected
-    #   lapply(input$subclusters, function(subcluster) {
-    #     color_picker_ui(session$ns(paste0("color_picker_subcluster_", subcluster)), label = subcluster)
-    #   })
-    # })
-    # # add a color picker for each selected sample
-    # output$sample_color_pickers <- renderUI({
-    #   req(input$samples) # Ensure samples are selected
-    #   lapply(input$samples, function(sample) {
-    #     color_picker_ui(session$ns(paste0("color_picker_sample_", sample)), label = sample)
-    #   })
-    # })
-    # # add a color picker for each selected experiment
-    # output$experiment_color_pickers <- renderUI({
-    #   req(input$experiments) # Ensure experiments are selected
-    #   lapply(input$experiments, function(experiment) {
-    #     color_picker_ui(session$ns(paste0("color_picker_experiment_", experiment)), label = experiment)
-    #   })
-    # })
 
     return(
       reactive({

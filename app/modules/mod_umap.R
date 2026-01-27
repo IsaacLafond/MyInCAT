@@ -12,8 +12,6 @@ mod_umap_ui <- function(id) {
       choices = names(choices_data)
     ),
 
-    # verbatimTextOutput(ns("debug_group_by"), placeholder = TRUE),
-
     # Output: UMAP
     plotOutput(
       ns("umapPlot"),
