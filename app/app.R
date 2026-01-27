@@ -1,9 +1,11 @@
 library(shiny)
 library(bslib)
 library(colourpicker)
+library(Seurat)
+library(ggplot2)
 
-# Hist Demo App modules
-source("modules/mod_histogram.R")
+# Utils
+source("utils/choices.R")
 
 # UI app modules
 source("modules/mod_subset_sidebar.R")
@@ -17,6 +19,11 @@ source("ui/umap_code.R")
 
 # Set static resource path to www directory
 addResourcePath(prefix = "www", directoryPath = "www")
+
+# -------------------------
+
+# load data
+sc_combined_tier1 <- readRDS("data/sc_combined_tier1.rds")
 
 
 ui <- page_fillable(
@@ -55,12 +62,6 @@ ui <- page_fillable(
       home_ui()
     ),
 
-    # hist demo tab
-    nav_panel(
-      title = "Hist",
-      mod_histogram_ui("hist")
-    ),
-
     # UMAP tab
     nav_panel(
       title = "UMAP",
@@ -83,8 +84,7 @@ ui <- page_fillable(
 
 server <- function(input, output, session) {
   sidebar_data <- mod_subset_sidebar_server("subset_sidebar")
-  mod_histogram_server("hist")
-  mod_umap_server("umap", sidebar_data)
+  mod_umap_server("umap", sidebar_data, sc_combined_tier1)
 }
 
 shinyApp(ui = ui, server = server)

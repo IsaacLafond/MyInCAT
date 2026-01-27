@@ -1,27 +1,3 @@
-choices_data <- list(
-  "cluster" = c(
-    "cluster1",
-    "cluster2",
-    "cluster3",
-    "cluster4",
-    "cluster5"
-    ),
-  "subcluster" = c(
-    "subclusterA",
-    "subclusterB",
-    "subclusterC"
-    ),
-  "orig.ident" = c(
-    "sample1",
-    "sample2", 
-    "sample3"
-    ),
-  "experiment" = c(
-    "experimentX",
-    "experimentY"
-    )
-)
-
 # -------------------------
 # Subset sidebar UI
 # -------------------------
@@ -32,44 +8,45 @@ mod_subset_sidebar_ui <- function(id) {
     accordion(
       accordion_panel(
         title = "Subset Options",
-        tagList(
-          selectizeInput(
-            ns("clusters"),
-            label = "Clusters:",
-            choices = choices_data$cluster,
-            multiple = TRUE
-          ),
-          div(id = ns("cluster_container")),
+        p("Subset selection options here...")
+        # tagList(
+        #   selectizeInput(
+        #     ns("clusters"),
+        #     label = "Clusters:",
+        #     choices = names(choices_data$cluster),
+        #     multiple = TRUE
+        #   ),
+        #   div(id = ns("cluster_container")),
 
-          selectizeInput(
-            ns("subclusters"),
-            label = "Subclusters:",
-            choices = choices_data$subcluster,
-            multiple = TRUE
-          ),
-          div(id = ns("subcluster_container")),
+        #   selectizeInput(
+        #     ns("subclusters"),
+        #     label = "Subclusters:",
+        #     choices = choices_data$subcluster,
+        #     multiple = TRUE
+        #   ),
+        #   div(id = ns("subcluster_container")),
 
-          selectizeInput( # AKA orig.ident
-            ns("samples"),
-            label = "Samples:",
-            choices = choices_data$orig.ident,
-            multiple = TRUE
-          ),
-          div(id = ns("sample_container")),
+        #   selectizeInput( # AKA orig.ident
+        #     ns("samples"),
+        #     label = "Samples:",
+        #     choices = choices_data$orig.ident,
+        #     multiple = TRUE
+        #   ),
+        #   div(id = ns("sample_container")),
 
-          selectizeInput(
-            ns("experiments"),
-            label = "Experiments:",
-            choices = choices_data$experiment,
-            multiple = TRUE
-          ),
-          div(id = ns("experiment_container"))
-        )
+        #   selectizeInput(
+        #     ns("experiments"),
+        #     label = "Experiments:",
+        #     choices = choices_data$experiment,
+        #     multiple = TRUE
+        #   ),
+        #   div(id = ns("experiment_container"))
+        # )
       ),
 
         accordion_panel(
           title = "Download Options",
-          p("Download options here")
+          p("Download options here...")
         ),
     )
   )
@@ -85,10 +62,10 @@ mod_subset_sidebar_server <- function(id) {
 
     # 1. Define the categories we want to manage
     categories <- list(
-      "cluster"     = "cluster_container",
-      "subcluster"  = "subcluster_container",
-      "sample"      = "sample_container",
-      "experiment"  = "experiment_container"
+      "Cluster"     = "cluster_container",
+      "Subcluster"  = "subcluster_container",
+      "Sample"      = "sample_container",
+      "Experiment"  = "experiment_container"
     )
 
     # 2. Create a list of reactiveVals to track the 'previous' state for each category
