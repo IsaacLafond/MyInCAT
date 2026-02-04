@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -----------------------------
 
 # install shiny/UI packages
-RUN R -e "options(warn=2); install.packages(c('shiny', 'colourpicker'))"
+RUN R -e "options(warn=2); install.packages(c('shiny', 'shinyWidgets', 'colourpicker'))"
 
 # Install devtools and remote for GitHub installs
 RUN R -e "options(warn=2); install.packages(c('devtools', 'remotes'))"

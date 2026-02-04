@@ -6,11 +6,7 @@ mod_umap_ui <- function(id) {
 
   page_fluid(
 
-    selectInput(
-      ns("group_by"),
-      "Group by:",
-      choices = names(groupby_choices)
-    ),
+    verbatimTextOutput(ns("output")),
 
     # Output: UMAP
     plotOutput(
@@ -19,12 +15,14 @@ mod_umap_ui <- function(id) {
       height = "66vh"
     ),
 
-    # Output: Metadata table
-    tableOutput(ns("meta_table")),
-
     # Relevant code
     accordion(
       id = ns("umap_code_accordion"),
+      accordion_panel(
+        title = "Meta Table",
+        # Output: Metadata table
+        tableOutput(ns("meta_table"))
+      ),
       accordion_panel(
         title = "Relevant Code",
         umap_code()
@@ -41,10 +39,15 @@ mod_umap_ui <- function(id) {
 # -------------------------
 mod_umap_server <- function(id, sidebar_selections, sc_combined_tier1) {
   moduleServer(id, function(input, output, session) {
+    output$output <- renderPrint({
+      sidebar_selections()
+    })
+
+    meta_table <- unique(sc_combined_tier1@meta.data[, c("experiment", "orig.ident", "seurat_clusters", "subcluster")])
 
     # Populate placeholder UMAP plot
     output$umapPlot <- renderPlot({
-      group_val <- groupby_choices[[input$group_by]]
+      group_val <- groupby_choices[[sidebar_selections()$group_by]]
 
       DimPlot(
         sc_combined_tier1,
@@ -68,10 +71,10 @@ mod_umap_server <- function(id, sidebar_selections, sc_combined_tier1) {
       striped = TRUE,
       hover = TRUE,
       bordered = TRUE,
-      {data.frame(
-        SampleID = 1:10,
-        Metadata = sample(LETTERS, 10)
-      )}
+      # content:
+      {
+        meta_table
+      }
     )
 
   })

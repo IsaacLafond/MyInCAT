@@ -1,47 +1,73 @@
 # -------------------------
 # Subset sidebar UI
 # -------------------------
-mod_subset_sidebar_ui <- function(id) {
+mod_subset_sidebar_ui <- function(id, clusters, subclusters, samples, experiments) {
   ns <- NS(id)
 
   page_fillable(
     accordion(
       accordion_panel(
         title = "Subset Options",
-        p("Subset selection options here...")
-        # tagList(
-        #   selectizeInput(
-        #     ns("clusters"),
-        #     label = "Clusters:",
-        #     choices = names(choices_data$cluster),
-        #     multiple = TRUE
-        #   ),
-        #   div(id = ns("cluster_container")),
 
-        #   selectizeInput(
-        #     ns("subclusters"),
-        #     label = "Subclusters:",
-        #     choices = choices_data$subcluster,
-        #     multiple = TRUE
-        #   ),
-        #   div(id = ns("subcluster_container")),
+        tagList(
+          selectInput(
+            ns("group_by"),
+            "Group by:",
+            choices = names(groupby_choices)
+          ),
 
-        #   selectizeInput( # AKA orig.ident
-        #     ns("samples"),
-        #     label = "Samples:",
-        #     choices = choices_data$orig.ident,
-        #     multiple = TRUE
-        #   ),
-        #   div(id = ns("sample_container")),
+          pickerInput(
+            inputId = ns("experiments"),
+            label = "Experiments:",
+            choices = experiments,
+            options = pickerOptions(
+              actionsBox = TRUE,
+              dropdownAlignRight = 'auto'
+            ),
+            multiple = TRUE
+          ),
 
-        #   selectizeInput(
-        #     ns("experiments"),
-        #     label = "Experiments:",
-        #     choices = choices_data$experiment,
-        #     multiple = TRUE
-        #   ),
-        #   div(id = ns("experiment_container"))
-        # )
+          # div(id = ns("experiment_container"))
+
+          pickerInput( # AKA orig.ident
+            inputId = ns("samples"),
+            label = "Samples:",
+            choices = samples,
+            options = pickerOptions(
+              actionsBox = TRUE,
+              dropdownAlignRight = 'auto'
+            ),
+            multiple = TRUE
+          ),
+
+          # div(id = ns("sample_container")),
+          
+          pickerInput(
+            inputId = ns("clusters"),
+            label = "Clusters:",
+            choices = clusters,
+            options = pickerOptions(
+              actionsBox = TRUE,
+              dropdownAlignRight = 'auto'
+            ),
+            multiple = TRUE
+          ),
+
+          # div(id = ns("cluster_container")),
+          
+          pickerInput(
+            inputId = ns("subclusters"),
+            label = "Subclusters:",
+            choices = subclusters,
+            options = pickerOptions(
+              actionsBox = TRUE,
+              dropdownAlignRight = 'auto'
+            ),
+            multiple = TRUE
+          ),
+          
+          # div(id = ns("subcluster_container")),
+        )
       ),
 
         accordion_panel(
@@ -112,36 +138,43 @@ mod_subset_sidebar_server <- function(id) {
 
     return(
       reactive({
-        # Helper function to match labels to their dynamic color inputs
-        get_colors <- function(selections, prefix) {
-          if (is.null(selections) || length(selections) == 0) return(NULL)
-          
-          # Map selection names to the values in the color picker inputs
-          # Note: we use session$input to access inputs within this module
-          vals <- sapply(selections, function(x) {
-            # This ID must match exactly how you created it in renderUI
-            input_id <- paste0("color_picker_", prefix, "_", x)
-            val <- input[[input_id]]
-
-            # Default to black if not yet rendered
-            if (is.null(val)) {
-              return("#000000") # default black
-            } else {
-              return(val)
-            }
-          })
-          
-          names(vals) <- selections
-          return(vals)
-        }
-
-
         list(
-          clusters = get_colors(input$clusters, "cluster"),
-          subclusters = get_colors(input$subclusters, "subcluster"),
-          samples = get_colors(input$samples, "sample"),
-          experiments = get_colors(input$experiments, "experiment")
+          group_by = input$group_by,
+          experiments = input$experiments,
+          samples = input$samples,
+          clusters = input$clusters,
+          subclusters = input$subclusters
         )
+        # # Helper function to match labels to their dynamic color inputs
+        # get_colors <- function(selections, prefix) {
+        #   if (is.null(selections) || length(selections) == 0) return(NULL)
+          
+        #   # Map selection names to the values in the color picker inputs
+        #   # Note: we use session$input to access inputs within this module
+        #   vals <- sapply(selections, function(x) {
+        #     # This ID must match exactly how you created it in renderUI
+        #     input_id <- paste0("color_picker_", prefix, "_", x)
+        #     val <- input[[input_id]]
+
+        #     # Default to black if not yet rendered
+        #     if (is.null(val)) {
+        #       return("#000000") # default black
+        #     } else {
+        #       return(val)
+        #     }
+        #   })
+          
+        #   names(vals) <- selections
+        #   return(vals)
+        # }
+
+
+        # list(
+        #   clusters = get_colors(input$clusters, "cluster"),
+        #   subclusters = get_colors(input$subclusters, "subcluster"),
+        #   samples = get_colors(input$samples, "sample"),
+        #   experiments = get_colors(input$experiments, "experiment")
+        # )
       })
     )
 
