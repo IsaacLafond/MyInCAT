@@ -1,4 +1,6 @@
 library(shiny)
+library(shinyjs)
+library(shinyWidgets)
 library(bslib)
 library(colourpicker)
 library(Seurat)
@@ -53,7 +55,12 @@ ui <- page_fillable(
       fillable = TRUE,
       fill = TRUE,
       # content:
-      mod_subset_sidebar_ui("subset_sidebar")
+      mod_subset_sidebar_ui("subset_sidebar",
+        unique(sc_combined_tier1$seurat_clusters),
+        unique(sc_combined_tier1$subcluster),
+        unique(sc_combined_tier1$orig.ident),
+        unique(sc_combined_tier1$experiment)
+      )
     ),
 
     # Home tab
