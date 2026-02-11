@@ -6,128 +6,413 @@ groupby_choices <- list(
   "Subcluster" = "subcluster"
 )
 
+# ===========================
+# Cell types and subclusters
+# ===========================
+sat_cells <- c(
+  "Quiescent SCs",
+  "Activated SCs",
+  "Cachectic SCs",
+  "Pro-angiogenic SCs"
+)
+myoblasts <- c(
+  "Committed myoblasts",
+  "Differentiating myoblasts (2b)",
+  "Differentiating myoblasts (2b/x)",
+  "Differentiating myoblasts (2x)"
+)
+myonuclei <- c(
+  "Type 1 myonuclei",
+  "Type 2a/x myonuclei",
+  "Type 2b myonuclei",
+  "Type 2b/x myonuclei",
+  "Type 2x myonuclei"
+)
+endothelial_cells <- c(
+  "Capillary ECs",
+  "Arterial ECs",
+  "Venous ECs"
+)
+vsmcs <- c(
+  "vSMCs"
+)
+pericytes <- c(
+  "Pericytes"
+)
+faps <- c(
+  "Stem FAPs",
+  "Activated FAPs",
+  "Pro-remodeling FAPs",
+  "Pro-angiogenic FAPs",
+  "Pro-adipogenic FAPs",
+  "Immuno FAPs",
+  "Tenm2+ FAPs"
+)
+tenocytes <- c(
+  "Tenocytes"
+)
+platelets <- c(
+  "Platelets"
+)
+mast_cells <- c(
+  "Mast cells"
+)
+dendritic_cells <- c(
+  "Dendritic cells"
+)
+monocytes <- c(
+  "Patrolling monocytes",
+  "Inflammatory monocytes"
+)
+macrophages <- c(
+  "M1 macrophages",
+  "M1/M2 macrophages",
+  "M2 macrophages"
+)
+neutrophils <- c(
+  "Promyelocytes",
+  "Myelocytes",
+  "Mature neutrophils"
+)
+b_cells <- c(
+  "Pro-B cells",
+  "Naive B cells",
+  "Immature B cells",
+  "Regulatory B cells",
+  "Plasma cells"
+)
+t_cells <- c(
+  "Naive T cells",
+  "Cytotoxic T cells"
+)
+nk_cells <- c(
+  "NK cells"
+)
+neural_glial_cells <- c(
+  "Neural/glial cells"
+)
+schwann_cells <- c(
+  "Schwann cells"
+)
+
+# ===========================
+# Subset options tree
+# ===========================
 subset_choices <- c(
   # experiment
   "Agca_snLLC" = c(
     # samples
-    "Agca_snLLC_CTL" = c(),
-    "Agca_snLLC_LLC" = c()
+    "Agca_snLLC_CTL" = c(
+      "Satellite cells" = sat_cells,
+      "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      # "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      # "T cells" = t_cells,
+      # "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Agca_snLLC_LLC" = c(
+      "Satellite cells" = sat_cells,
+      "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      # "Mast cells" = mast_cells,
+      # "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   ),
+  # experiment
   "Brown_scLLC" = c(
-    "Brown_scLLC_CTL" = c(),
-    "Brown_scLLC_2w" = c(),
-    "Brown_scLLC_2.5w" = c(),
-    "Brown_scLLC_3.5w" = c()
+    "Brown_scLLC_CTL" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Brown_scLLC_2w" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Brown_scLLC_2.5w" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Brown_scLLC_3.5w" = c(
+      "Satellite cells" = sat_cells,
+      "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   ),
+  # experiment
   "Kim_scB16F10" = c(
-    "Kim_scB16F10_CTL" = c(),
-    "Kim_scB16F10_B16F10" = c()
+    "Kim_scB16F10_CTL" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Kim_scB16F10_B16F10" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   ),
+  # experiment
   "Pryce_scC26" = c(
-    "Pryce_scC26_CTL" = c(),
-    "Pryce_scC26_C26" = c()
+    "Pryce_scC26_CTL" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Pryce_scC26_C26" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   ),
+  # experiment
   "Pryce_scKPP" = c(
-    "Pryce_scKPP_CTL" = c(),
-    "Pryce_scKPP_KPP" = c()
+    "Pryce_scKPP_CTL" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Pryce_scKPP_KPP" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   ),
+  # experiment
   "Zhang_snKIC" = c(
-    "Zhang_snKIC_CTL" = c(),
-    "Zhang_snKIC_KIC" = c()
+    "Zhang_snKIC_CTL" = c(
+      "Satellite cells" = sat_cells,
+      # "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      # "Mast cells" = mast_cells,
+      "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      # "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    ),
+    "Zhang_snKIC_KIC" = c(
+      "Satellite cells" = sat_cells,
+      "Myoblasts" = myoblasts,
+      "Myonuclei" = myonuclei,
+      "Endothelial cells" = endothelial_cells,
+      "vSMCs" = vsmcs,
+      "Pericytes" = pericytes,
+      "FAPs" = faps,
+      "Tenocytes" = tenocytes,
+      "Platelets" = platelets,
+      # "Mast cells" = mast_cells,
+      # "Dendritic cells" = dendritic_cells,
+      "Monocytes" = monocytes,
+      "Macrophages" = macrophages,
+      "Neutrophils" = neutrophils,
+      "B cells" = b_cells,
+      # "T cells" = t_cells,
+      "NK cells" = nk_cells,
+      "Neural/glial cells" = neural_glial_cells,
+      "Schwann cells" = schwann_cells
+    )
   )
 )
-
-# ===========================
-# Cell types and subclusters
-# ===========================
-# sat_cells <- "Satellite cells" = c(
-#   "Quiescent SCs",
-#   "Activated SCs",
-#   "Cachectic SCs",
-#   "Pro-angiogenic SCs"
-# )
-# myoblasts <- "Myoblasts" = c(
-#   "Committed myoblasts",
-#   "Differentiating myoblasts (2b)",
-#   "Differentiating myoblasts (2b/x)",
-#   "Differentiating myoblasts (2x)"
-# )
-# myonuclei <- "Myonuclei" = c(
-#   "Type 1 myonuclei",
-#   "Type 2a/x myonuclei",
-#   "Type 2b myonuclei",
-#   "Type 2b/x myonuclei",
-#   "Type 2x myonuclei"
-# )
-# endothelial_cells <- "Endothelial cells" = c(
-#   "Capillary ECs",
-#   "Arterial ECs",
-#   "Venous ECs"
-# )
-# vsmcs <- "vSMCs" = c(
-#   "vSMCs"
-# )
-# pericytes <- "Pericytes" = c(
-#   "Pericytes"
-# )
-# faps <- "FAPs" = c(
-#   "Stem FAPs",
-#   "Activated FAPs",
-#   "Pro-remodeling FAPs",
-#   "Pro-angiogenic FAPs",
-#   "Pro-adipogenic FAPs",
-#   "Immuno FAPs",
-#   "Tenm2+ FAPs"
-# )
-# tenocytes <- "Tenocytes" = c(
-#   "Tenocytes"
-# )
-# adipocytes <- "Adipocytes" = c(
-#   "Adipocytes"
-# )
-# platelets <- "Platelets" = c(
-#   "Platelets"
-# )
-# mast_cells <- "Mast cells" = c(
-#   "Mast cells"
-# )
-# dendritic_cells <- "Dendritic cells" = c(
-#   "Dendritic cells"
-# )
-# monocytes <- "Monocytes" = c(
-#   "Patrolling monocytes",
-#   "Inflammatory monocytes"
-# )
-# macrophages <- "Macrophages" = c(
-#   "M1 macrophages",
-#   "M1/M2 macrophages",
-#   "M2 macrophages"
-# )
-# neutrophils <- "Neutrophils" = c(
-#   "Promyelocytes",
-#   "Myelocytes",
-#   "Mature neutrophils"
-# )
-# b_cells <- "B cells" = c(
-#   "Pro-B cells",
-#   "Naive B cells",
-#   "Immature B cells",
-#   "Regulatory B cells",
-#   "Plasma cells"
-# )
-# t_cells <- "T cells" = c(
-#   "Naive T cells",
-#   "Cytotoxic T cells"
-# )
-# nk_cells <- "NK cells" = c(
-#   "NK cells"
-# )
-# neural_glial_cells <- "Neural/glial cells" = c(
-#   "Neural/glial cells"
-# )
-# schwann_cells <- "Schwann cells" = c(
-#   "Schwann cells"
-# )
 
 
 
