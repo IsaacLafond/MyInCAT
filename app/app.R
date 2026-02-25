@@ -35,7 +35,7 @@ tree_data <- sc_combined_tier1@meta.data %>%
   # Convert factors to character to avoid levels showing up where they don't exist
   mutate(across(everything(), as.character)) %>%
   # Arrange them so the tree looks organized
-  arrange(experiment, orig.ident, seurat_clusters, subcluster)
+  arrange(experiment, seurat_clusters, subcluster)
 
 
 ui <- page_fillable(
@@ -66,10 +66,10 @@ ui <- page_fillable(
       fill = TRUE,
       # content:
       mod_subset_sidebar_ui("subset_sidebar",
-        unique(sc_combined_tier1$seurat_clusters),
-        unique(sc_combined_tier1$subcluster),
-        unique(sc_combined_tier1$orig.ident),
-        unique(sc_combined_tier1$experiment),
+        # unique(sc_combined_tier1$seurat_clusters),
+        # unique(sc_combined_tier1$subcluster),
+        # unique(sc_combined_tier1$orig.ident),
+        # unique(sc_combined_tier1$experiment),
         tree_data
       )
     ),
@@ -101,8 +101,22 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
+  sc_subset <- reactive({
+    req(sidebar_data())
+
+    selected_options <- sidebar_data()
+
+    subset(
+      sc_combined_tier1,
+      subset =  experiment %in% selected_options$experiments &
+                orig.ident %in% selected_options$samples &
+                seurat_clusters %in% selected_options$clusters &
+                subcluster %in% selected_options$subclusters
+    )
+  })
+
   sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
-  mod_umap_server("umap", sidebar_data, sc_combined_tier1)
+  mod_umap_server("umap", sidebar_data, sc_subset)
 }
 
 shinyApp(ui = ui, server = server)
