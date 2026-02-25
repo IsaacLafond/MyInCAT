@@ -3,10 +3,10 @@
 # -------------------------
 mod_subset_sidebar_ui <- function(
   id,
-  clusters,
-  subclusters,
-  samples,
-  experiments,
+  # clusters,
+  # subclusters,
+  # samples,
+  # experiments,
   tree_data) {
   ns <- NS(id)
 
@@ -87,7 +87,8 @@ mod_subset_sidebar_ui <- function(
             label = "Select Desired Elements:",
             choices = create_tree(tree_data),
             selected = tree_data$experiment,
-            # returnValue = "all"
+            # closeDepth = 4,
+            returnValue = "all"
             # returnValue = c("text", "id", "all"),
           )
         )
@@ -167,13 +168,16 @@ mod_subset_sidebar_server <- function(id, tree_map) {
         # req(input$subclusters)
         req(input$subset_tree)
 
+        tree_raw <- input$subset_tree
+
+        selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
+
         list(
           group_by    = input$group_by,
-          experiments = intersect(input$subset_tree, tree_map$experiment),
-          samples     = intersect(input$subset_tree, tree_map$orig.ident),
-          clusters    = intersect(input$subset_tree, tree_map$seurat_clusters),
-          subclusters = intersect(input$subset_tree, tree_map$subcluster),
-          tree        = input$subset_tree
+          experiments = intersect(selected_labels, tree_map$experiment),
+          samples     = intersect(selected_labels, tree_map$orig.ident),
+          clusters    = intersect(selected_labels, tree_map$seurat_clusters),
+          subclusters = intersect(selected_labels, tree_map$subcluster)
         )
         # # Helper function to match labels to their dynamic color inputs
         # get_colors <- function(selections, prefix) {
