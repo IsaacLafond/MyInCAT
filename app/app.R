@@ -13,6 +13,7 @@ source("utils/choices.R")
 # UI app modules
 source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
+source("modules/mod_deg.R")
 
 # UI components
 source("ui/home_ui.R")
@@ -32,10 +33,12 @@ sc_combined_tier1 <- readRDS("data/sc_combined_tier1.rds")
 tree_data <- sc_combined_tier1@meta.data %>%
   select(experiment, orig.ident, seurat_clusters, subcluster) %>%
   distinct() %>%
-  # Convert factors to character to avoid levels showing up where they don't exist
-  mutate(across(everything(), as.character)) %>%
-  # Arrange them so the tree looks organized
-  arrange(experiment, seurat_clusters, subcluster)
+  # Arrange them to maintain consistency (arrange before string so follow factor order)
+  arrange(experiment, orig.ident, seurat_clusters) %>%
+  # Convert factors to character
+  mutate(across(everything(), as.character))
+
+rna_features <- readRDS("data/rna_features.rds")
 
 
 ui <- page_fillable(
@@ -89,7 +92,7 @@ ui <- page_fillable(
     # DEGs tab
     nav_panel(
       title = "DEGs",
-      coming_soon() # TODO
+      mod_deg_ui("deg", rna_features)
     ),
 
     # CellChat tab
