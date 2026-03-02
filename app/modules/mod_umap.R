@@ -10,10 +10,10 @@ mod_umap_ui <- function(id) {
 
     # Output: UMAP
     plotOutput(
-      ns("umapPlot"),
+      ns("umap_plot"),
       width = "100%",
       height = "66vh"
-    ),
+    ), # add pipe into withSpinner() eventually
 
     # Relevant code
     accordion(
@@ -39,12 +39,14 @@ mod_umap_ui <- function(id) {
 # -------------------------
 mod_umap_server <- function(id, sidebar_selections, sc_object) {
   moduleServer(id, function(input, output, session) {
-    output$output <- renderPrint({
-      str(sidebar_selections())
-    })
+    # output$output <- renderPrint({
+    #   str(sidebar_selections())
+    # })
 
     # Populate placeholder UMAP plot
-    output$umapPlot <- renderPlot({
+    output$umap_plot <- renderPlot({
+      req(sidebar_selections(), sc_object())
+
       selected_options <- sidebar_selections()
       group_val <- groupby_choices[[selected_options$group_by]]
 
@@ -72,10 +74,18 @@ mod_umap_server <- function(id, sidebar_selections, sc_object) {
       bordered = TRUE,
       # content:
       {
+        req(sc_object())
+
         sc_object()@meta.data %>%
           group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
           summarise(n_cells = n(), .groups = "drop") %>%
           arrange(experiment, orig.ident, seurat_clusters)
+
+          # # Optimization: Use data.table or fast dplyr for the summary
+          # sc_object()@meta.data %>%
+          #   count(experiment, orig.ident, seurat_clusters, subcluster) %>%
+          #   arrange(experiment, orig.ident, seurat_clusters)
+          # ?????????????????
       }
     )
 

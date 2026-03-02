@@ -1,5 +1,5 @@
-groupby_choices <- list(
-  "None" = NULL,
+groupby_choices <- c(
+  # "None" = NULL,
   "Experiment" = "experiment",
   "Sample" = "orig.ident",
   "Cluster" = "seurat_clusters",

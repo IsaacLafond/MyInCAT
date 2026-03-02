@@ -1,9 +1,12 @@
+# UI
 library(shiny)
 library(shinyjs)
 library(shinyWidgets)
 library(bslib)
 library(colourpicker)
+# Analysis
 library(Seurat)
+library(BPCells)
 library(ggplot2)
 library(dplyr)
 
@@ -27,10 +30,10 @@ addResourcePath(prefix = "www", directoryPath = "www")
 # -------------------------
 
 # load data
-sc_combined_tier1 <- readRDS("data/sc_combined_tier1.rds")
+sc_combined <- readRDS("data/sc_combined_shell.rds")
 
 # create subset tree
-tree_data <- sc_combined_tier1@meta.data %>%
+tree_data <- sc_combined@meta.data %>%
   select(experiment, orig.ident, seurat_clusters, subcluster) %>%
   distinct() %>%
   # Arrange them to maintain consistency (arrange before string so follow factor order)
@@ -38,6 +41,7 @@ tree_data <- sc_combined_tier1@meta.data %>%
   # Convert factors to character
   mutate(across(everything(), as.character))
 
+# load all features (genes) for virtual multiselect
 rna_features <- readRDS("data/rna_features.rds")
 
 
@@ -68,13 +72,7 @@ ui <- page_fillable(
       fillable = TRUE,
       fill = TRUE,
       # content:
-      mod_subset_sidebar_ui("subset_sidebar",
-        # unique(sc_combined_tier1$seurat_clusters),
-        # unique(sc_combined_tier1$subcluster),
-        # unique(sc_combined_tier1$orig.ident),
-        # unique(sc_combined_tier1$experiment),
-        tree_data
-      )
+      mod_subset_sidebar_ui("subset_sidebar", tree_data)
     ),
 
     # Home tab
@@ -106,11 +104,10 @@ ui <- page_fillable(
 server <- function(input, output, session) {
   sc_subset <- reactive({
     req(sidebar_data())
-
     selected_options <- sidebar_data()
 
     subset(
-      sc_combined_tier1,
+      sc_combined,
       subset =  experiment %in% selected_options$experiments &
                 orig.ident %in% selected_options$samples &
                 seurat_clusters %in% selected_options$clusters &
@@ -119,6 +116,7 @@ server <- function(input, output, session) {
   })
 
   sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
+
   mod_umap_server("umap", sidebar_data, sc_subset)
 }
 
