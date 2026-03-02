@@ -15,12 +15,19 @@ home_ui <- function() {
 
     p("For a tutorial on how to use CachexiaSC, please watch this video!"),
 
-    tags$iframe(
-      src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    # tags$iframe(
+    #   src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    #   width = "66%",
+    #   frameborder = "0",
+    #   allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+    #   allowfullscreen = NA,
+    #   style = "aspect-ratio: 16/9;",
+    #   class = "mx-auto d-block"
+    # ),
+    img(
+      src = "www/video-coming-soon-placeholder.gif",
+      alt = "Video coming soon placeholder",
       width = "66%",
-      frameborder = "0",
-      allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-      allowfullscreen = NA,
       style = "aspect-ratio: 16/9;",
       class = "mx-auto d-block"
     ),
@@ -35,6 +42,7 @@ home_ui <- function() {
 
     h3("Studies/Models table"),
 
-    p("Version 0.1.0, Developed by Isaac Lafond", class = "fst-italic text-center small")
+    p("Developed by Isaac Lafond", class = "fst-italic text-center small")
+    # p("Version 0.1.0, Developed by Isaac Lafond", class = "fst-italic text-center small")
   )
 }

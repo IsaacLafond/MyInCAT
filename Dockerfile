@@ -24,8 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglpk-dev \
     # hdf5r dependencies
     # patch \
-    # Seurat disk dependencies
-    # libhdf5-dev \
+    # BPCells dependencies
+    libhdf5-dev \
   && rm -rf /var/lib/apt/lists/*
 #     libudunits2-dev \
 #     libgdal-dev \
@@ -48,6 +48,9 @@ RUN R -e "options(warn=2); install.packages(c('devtools', 'remotes'))"
 
 # Install Seurat
 RUN R -e "options(warn=2); install.packages('Seurat')"
+
+# Install BPCells
+RUN R -e "options(warn=2); remotes::install_github('bnprks/BPCells/r')"
 
 # Install Seurat disk
 # RUN R -e "options(warn=2); install.packages('hdf5r')"

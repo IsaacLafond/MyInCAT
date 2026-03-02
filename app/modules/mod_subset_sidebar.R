@@ -1,13 +1,7 @@
 # -------------------------
 # Subset sidebar UI
 # -------------------------
-mod_subset_sidebar_ui <- function(
-  id,
-  # clusters,
-  # subclusters,
-  # samples,
-  # experiments,
-  tree_data) {
+mod_subset_sidebar_ui <- function(id, tree_data) {
   ns <- NS(id)
 
   page_fillable(
@@ -90,6 +84,12 @@ mod_subset_sidebar_ui <- function(
             # closeDepth = 4,
             returnValue = "all"
             # returnValue = c("text", "id", "all"),
+          ),
+
+          actionButton(
+            inputId = ns("apply"),
+            label = "Apply Changes",
+            class = "btn_primary w-100"
           )
         )
       ),
@@ -160,57 +160,54 @@ mod_subset_sidebar_server <- function(id, tree_map) {
     #   })
     # })
 
-    return(
-      reactive({
-        req(input$group_by)
-        # req(input$experiments)
-        # req(input$samples)
-        # req(input$subclusters)
-        req(input$subset_tree)
+    # eventReactive so downstream modules only update when "Apply Changes" is clicked.
+    selections <- eventReactive(input$apply, {
+      req(input$group_by, input$subset_tree)
+      tree_raw <- input$subset_tree
+      selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
 
-        tree_raw <- input$subset_tree
+      list(
+        group_by    = input$group_by,
+        experiments = intersect(selected_labels, tree_map$experiment),
+        samples     = intersect(selected_labels, tree_map$orig.ident),
+        clusters    = intersect(selected_labels, tree_map$seurat_clusters),
+        subclusters = intersect(selected_labels, tree_map$subcluster)
+      )
+    }, ignoreNULL = FALSE) # Load defaults on start
 
-        selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
+    return(selections)
 
-        list(
-          group_by    = input$group_by,
-          experiments = intersect(selected_labels, tree_map$experiment),
-          samples     = intersect(selected_labels, tree_map$orig.ident),
-          clusters    = intersect(selected_labels, tree_map$seurat_clusters),
-          subclusters = intersect(selected_labels, tree_map$subcluster)
-        )
-        # # Helper function to match labels to their dynamic color inputs
-        # get_colors <- function(selections, prefix) {
-        #   if (is.null(selections) || length(selections) == 0) return(NULL)
-          
-        #   # Map selection names to the values in the color picker inputs
-        #   # Note: we use session$input to access inputs within this module
-        #   vals <- sapply(selections, function(x) {
-        #     # This ID must match exactly how you created it in renderUI
-        #     input_id <- paste0("color_picker_", prefix, "_", x)
-        #     val <- input[[input_id]]
+    # ===== Old olor picker code (was in reactive block?) =====
+    # # Helper function to match labels to their dynamic color inputs
+    # get_colors <- function(selections, prefix) {
+    #   if (is.null(selections) || length(selections) == 0) return(NULL)
+      
+    #   # Map selection names to the values in the color picker inputs
+    #   # Note: we use session$input to access inputs within this module
+    #   vals <- sapply(selections, function(x) {
+    #     # This ID must match exactly how you created it in renderUI
+    #     input_id <- paste0("color_picker_", prefix, "_", x)
+    #     val <- input[[input_id]]
 
-        #     # Default to black if not yet rendered
-        #     if (is.null(val)) {
-        #       return("#000000") # default black
-        #     } else {
-        #       return(val)
-        #     }
-        #   })
-          
-        #   names(vals) <- selections
-        #   return(vals)
-        # }
+    #     # Default to black if not yet rendered
+    #     if (is.null(val)) {
+    #       return("#000000") # default black
+    #     } else {
+    #       return(val)
+    #     }
+    #   })
+      
+    #   names(vals) <- selections
+    #   return(vals)
+    # }
 
 
-        # list(
-        #   clusters = get_colors(input$clusters, "cluster"),
-        #   subclusters = get_colors(input$subclusters, "subcluster"),
-        #   samples = get_colors(input$samples, "sample"),
-        #   experiments = get_colors(input$experiments, "experiment")
-        # )
-      })
-    )
+    # list(
+    #   clusters = get_colors(input$clusters, "cluster"),
+    #   subclusters = get_colors(input$subclusters, "subcluster"),
+    #   samples = get_colors(input$samples, "sample"),
+    #   experiments = get_colors(input$experiments, "experiment")
+    # )
 
   })
 }
