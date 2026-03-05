@@ -1,3 +1,4 @@
+
 # UI
 library(shiny)
 library(shinyjs)
@@ -17,9 +18,11 @@ source("utils/choices.R")
 source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
 source("modules/mod_deg.R")
+source("modules/mod_deg_plots.R")
 
 # UI components
 source("ui/home_ui.R")
+source("ui/deg_tab.R")
 source("ui/coming_soon.R")
 source("ui/color_picker.R")
 source("ui/umap_code.R")
@@ -31,6 +34,8 @@ addResourcePath(prefix = "www", directoryPath = "www")
 
 # load data
 sc_combined <- readRDS("data/sc_combined_shell.rds")
+sc_combined[["RNA"]]$counts <- open_matrix_dir("data/RNA_counts")
+sc_combined[["RNA"]]$data <- open_matrix_dir("data/RNA_data")
 
 # create subset tree
 tree_data <- sc_combined@meta.data %>%
@@ -90,7 +95,7 @@ ui <- page_fillable(
     # DEGs tab
     nav_panel(
       title = "DEGs",
-      mod_deg_ui("deg", rna_features)
+      deg_tab_ui("deg", rna_features)
     ),
 
     # CellChat tab
@@ -118,6 +123,8 @@ server <- function(input, output, session) {
   sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
 
   mod_umap_server("umap", sidebar_data, sc_subset)
+  mod_deg_server("degs", sidebar_data, sc_subset)
+  mod_deg_plots_server("deg_plots", sidebar_data, sc_subset)
 }
 
 shinyApp(ui = ui, server = server)
