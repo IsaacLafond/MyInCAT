@@ -96,7 +96,7 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
 
         accordion_panel(
           title = "Download Options",
-          p("Download options here...")
+          p("Download options coming soon...")
         ),
     )
   )

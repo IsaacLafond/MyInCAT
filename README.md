@@ -8,8 +8,8 @@ MyInCAT/
 ├── Alex/           # R markdown files of the analysis code to be built into web app.
 ├── app/            # App source files
 │   ├── data/       # R datasets/data object
-│   ├── modules/    # Shiny web app modules
-│   ├── ui/         # UI components
+│   ├── modules/    # Interactive Shiny web app modules
+│   ├── ui/         # Static UI components
 │   ├── utils/
 │   ├── www/        # Static web content
 │   └── app.R       # App entry point
