@@ -92,6 +92,7 @@ RUN R -e "options(warn=2); remotes::install_github('bnprks/BPCells/r')"
 # Copy Shiny app/set working dir
 # -----------------------------
 WORKDIR /app
+COPY . /app
 
 # -----------------------------
 # Expose port & run
@@ -101,6 +102,7 @@ EXPOSE 3838
 CMD ["R", "-e", "shiny::runApp('/app', host='0.0.0.0', port=3838)"]
 
 # Broken packages:
+    # Need BPCells?
     # SeuratWrappers
     # monocle3
     # CellChat

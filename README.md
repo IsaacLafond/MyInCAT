@@ -5,7 +5,6 @@ Welcome to MyInCAT (Myogenic single-cell Integration of Cachexia Transcriptomics
 ## Project structure:
 ```
 MyInCAT/
-├── Alex/           # R markdown files of the analysis code to be built into web app.
 ├── app/            # App source files
 │   ├── data/       # R datasets/data object
 │   ├── modules/    # Interactive Shiny web app modules
