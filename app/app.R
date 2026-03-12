@@ -1,4 +1,3 @@
-
 # UI
 library(shiny)
 library(shinyjs)
@@ -11,8 +10,10 @@ library(BPCells)
 library(ggplot2)
 library(dplyr)
 
+# App modules
+source("modules/mod_home.R")
+
 # UI components
-source("ui/home_ui.R")
 source("ui/coming_soon.R")
 
 # Set static resource path to www directory
@@ -44,7 +45,7 @@ ui <- page_fillable(
     # Home tab
     nav_panel(
       title = "Home",
-      home_ui()
+      mod_home_ui("home")
     ),
 
     # UMAP tab
@@ -68,7 +69,7 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
-  
+  mod_home_server("home")
 }
 
 shinyApp(ui = ui, server = server)
