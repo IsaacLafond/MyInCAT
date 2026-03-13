@@ -92,7 +92,7 @@ RUN R -e "options(warn=2); remotes::install_github('bnprks/BPCells/r')"
 # Copy Shiny app/set working dir
 # -----------------------------
 WORKDIR /app
-COPY . /app
+COPY . .
 
 # -----------------------------
 # Expose port & run
