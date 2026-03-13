@@ -10,16 +10,44 @@ library(BPCells)
 library(ggplot2)
 library(dplyr)
 
-# App modules
-source("modules/mod_home.R")
+# Utils
+source("utils/choices.R")
+
+# UI app modules
+source("modules/mod_subset_sidebar.R")
+source("modules/mod_umap.R")
+source("modules/mod_deg.R")
+source("modules/mod_deg_plots.R")
 
 # UI components
+source("ui/home_ui.R")
+source("ui/deg_tab.R")
 source("ui/coming_soon.R")
+source("ui/color_picker.R")
+source("ui/umap_code.R")
 
 # Set static resource path to www directory
 addResourcePath(prefix = "www", directoryPath = "www")
 
 # -------------------------
+
+# load data
+sc_combined <- readRDS("data/sc_combined_shell.rds")
+sc_combined[["RNA"]]$counts <- open_matrix_dir("data/RNA_counts")
+sc_combined[["RNA"]]$data <- open_matrix_dir("data/RNA_data")
+
+# create subset tree
+tree_data <- sc_combined@meta.data %>%
+  select(experiment, orig.ident, seurat_clusters, subcluster) %>%
+  distinct() %>%
+  # Arrange them to maintain consistency (arrange before string so follow factor order)
+  arrange(experiment, orig.ident, seurat_clusters) %>%
+  # Convert factors to character
+  mutate(across(everything(), as.character))
+
+# load all features (genes) for virtual multiselect
+rna_features <- readRDS("data/rna_features.rds")
+
 
 ui <- page_fillable(
   theme = bs_theme(
@@ -42,22 +70,31 @@ ui <- page_fillable(
       tags$img(src = "www/logo.png", height = "30px")
     ),
 
+    sidebar = sidebar(
+      title = "Options",
+      position = "right",
+      fillable = TRUE,
+      fill = TRUE,
+      # content:
+      mod_subset_sidebar_ui("subset_sidebar", tree_data)
+    ),
+
     # Home tab
     nav_panel(
       title = "Home",
-      mod_home_ui("home")
+      home_ui()
     ),
 
     # UMAP tab
     nav_panel(
       title = "UMAP",
-      coming_soon() # TODO
+      mod_umap_ui("umap")
     ),
 
     # DEGs tab
     nav_panel(
       title = "DEGs",
-      coming_soon() # TODO
+      deg_tab_ui("deg", rna_features)
     ),
 
     # CellChat tab
@@ -69,7 +106,24 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
-  mod_home_server("home")
+  sc_subset <- reactive({
+    req(sidebar_data())
+    selected_options <- sidebar_data()
+
+    subset(
+      sc_combined,
+      subset =  experiment %in% selected_options$experiments &
+                orig.ident %in% selected_options$samples &
+                seurat_clusters %in% selected_options$clusters &
+                subcluster %in% selected_options$subclusters
+    )
+  })
+
+  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
+
+  mod_umap_server("umap", sidebar_data, sc_subset)
+  mod_deg_server("degs", sidebar_data, sc_subset)
+  mod_deg_plots_server("deg_plots", sidebar_data, sc_subset)
 }
 
 shinyApp(ui = ui, server = server)
