@@ -1,3 +1,4 @@
+
 # UI
 library(shiny)
 library(shinyjs)
@@ -16,12 +17,12 @@ source("utils/choices.R")
 # UI app modules
 source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
+source("modules/mod_deg_tab.R")
 source("modules/mod_deg.R")
 source("modules/mod_deg_plots.R")
 
 # UI components
 source("ui/home_ui.R")
-source("ui/deg_tab.R")
 source("ui/coming_soon.R")
 source("ui/color_picker.R")
 source("ui/umap_code.R")
@@ -94,7 +95,7 @@ ui <- page_fillable(
     # DEGs tab
     nav_panel(
       title = "DEGs",
-      deg_tab_ui("deg", rna_features)
+      mod_deg_tab_ui("deg_tab", rna_features)
     ),
 
     # CellChat tab
@@ -106,24 +107,35 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
-  sc_subset <- reactive({
+  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
+
+  global_state <- reactive({
     req(sidebar_data())
     selected_options <- sidebar_data()
 
-    subset(
-      sc_combined,
-      subset =  experiment %in% selected_options$experiments &
-                orig.ident %in% selected_options$samples &
-                seurat_clusters %in% selected_options$clusters &
-                subcluster %in% selected_options$subclusters
+    groupby_choices <- c(
+      # "None" = NULL,
+      "Experiment" = "experiment",
+      "Sample" = "orig.ident",
+      "Cluster" = "seurat_clusters",
+      "Subcluster" = "subcluster"
+    )
+
+
+    list(
+      group_by = groupby_choices[[selected_options$group_by]],
+      sc_subset = subset(
+        sc_combined,
+        subset =  experiment %in% selected_options$experiments &
+                  orig.ident %in% selected_options$samples &
+                  seurat_clusters %in% selected_options$clusters &
+                  subcluster %in% selected_options$subclusters
+      )
     )
   })
 
-  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
-
-  mod_umap_server("umap", sidebar_data, sc_subset)
-  mod_deg_server("degs", sidebar_data, sc_subset)
-  mod_deg_plots_server("deg_plots", sidebar_data, sc_subset)
+  mod_umap_server("umap", global_state)
+  mod_deg_tab_server("deg_tab", global_state)
 }
 
 shinyApp(ui = ui, server = server)

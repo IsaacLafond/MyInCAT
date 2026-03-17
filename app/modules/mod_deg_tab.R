@@ -1,7 +1,7 @@
 # -------------------------
 # DEG Tab UI
 # -------------------------
-deg_tab_ui <- function(id, feature_choices) {
+mod_deg_tab_ui <- function(id, feature_choices) {
   ns <- NS(id)
 
   page_fillable(
@@ -24,8 +24,19 @@ deg_tab_ui <- function(id, feature_choices) {
         nav_panel(
             title = "Plots",
             # content:
-            mod_deg_plots_ui("deg_plots", feature_choices)
+            mod_deg_plots_ui(ns("deg_plots"), feature_choices)
         )
     )
   )
+}
+
+# -------------------------
+# DEG Tab server
+# -------------------------
+mod_deg_tab_server <- function(id, global_state) {
+  moduleServer(id, function(input, output, session) {
+
+    mod_deg_plots_server("deg_plots", global_state)
+
+  })
 }

@@ -29,30 +29,48 @@ mod_deg_plots_ui <- function(id, feature_choices) {
 # -------------------------
 # DEG Plots server
 # -------------------------
-mod_deg_plots_server <- function(id, sidebar_selections, sc_object) {
+mod_deg_plots_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
 
+    # plot_payload <- reactive({
+    #   req(sidebar_selections(), sc_object(), input$features)
+
+    #   selected_options <- sidebar_selections()
+    #   group_val <- groupby_choices[[selected_options$group_by]]
+
+    #   list(
+    #     sc_object = sc_object(),
+    #     sidebar = sidebar_selections(),
+    #     features = input$features
+    #   )
+    # })
+
     output$dot_plot <- renderPlot({
-      req(sidebar_selections(), sc_object())
+      # payload <- plot_payload()
+
+      # req(sidebar_selections(), sc_object())
+      state <- global_state()
 
       validate(
         need(length(input$features) > 0, "Please select at least one feature to display the plot."),
         need(length(input$features) <= 75, "Please select no more than 75 features.")
       )
 
-      selected_options <- sidebar_selections()
-      group_val <- groupby_choices[[selected_options$group_by]]
+      if (!input$features_open) {
+        # hist(rnorm(100), main = "Placeholder")
+        DotPlot(
+          state$sc_subset,
+          features = input$features,
+          group.by = state$group_by
+        ) +
+        theme(
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"),
+          axis.text.y = element_text(face = "italic")
+        ) +
+        scale_color_gradientn(colors = c("red", "white", "blue"))
 
-      DotPlot(
-        sc_object(),
-        features = input$features,
-        group.by = group_val
-      ) +
-      theme(
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"),
-        axis.text.y = element_text(face = "italic")
-      ) +
-      scale_color_gradientn(colors = c("red", "white", "blue"))
+      }
+
     })
 
 

@@ -37,7 +37,7 @@ mod_umap_ui <- function(id) {
 # -------------------------
 # UMAP server
 # -------------------------
-mod_umap_server <- function(id, sidebar_selections, sc_object) {
+mod_umap_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
     # output$output <- renderPrint({
     #   str(sidebar_selections())
@@ -45,15 +45,14 @@ mod_umap_server <- function(id, sidebar_selections, sc_object) {
 
     # Populate placeholder UMAP plot
     output$umap_plot <- renderPlot({
-      req(sidebar_selections(), sc_object())
+      req(global_state())
 
-      selected_options <- sidebar_selections()
-      group_val <- groupby_choices[[selected_options$group_by]]
+      state <- global_state()
 
       DimPlot(
-        sc_object(),
+        state$sc_subset,
         reduction = "umap",
-        group.by = group_val,
+        group.by = state$group_by,
         repel = TRUE,
         pt.size = 1
       ) +
@@ -74,9 +73,11 @@ mod_umap_server <- function(id, sidebar_selections, sc_object) {
       bordered = TRUE,
       # content:
       {
-        req(sc_object())
+        req(global_state())
 
-        sc_object()@meta.data %>%
+        state <- global_state()
+
+        state$sc_subset@meta.data %>%
           group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
           summarise(n_cells = n(), .groups = "drop") %>%
           arrange(experiment, orig.ident, seurat_clusters)
