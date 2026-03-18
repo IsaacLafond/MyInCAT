@@ -1,9 +1,9 @@
-
 # UI
 library(shiny)
-library(shinyjs)
-library(shinyWidgets)
 library(bslib)
+# library(shinyjs)
+library(shinyWidgets)
+library(shinycssloaders)
 library(colourpicker)
 # Analysis
 library(Seurat)
@@ -23,6 +23,7 @@ source("modules/mod_deg_plots.R")
 
 # UI components
 source("ui/home_ui.R")
+source("ui/custom_spinner.R")
 source("ui/coming_soon.R")
 source("ui/color_picker.R")
 source("ui/umap_code.R")

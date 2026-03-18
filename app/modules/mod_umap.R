@@ -13,7 +13,7 @@ mod_umap_ui <- function(id) {
       ns("umap_plot"),
       width = "100%",
       height = "66vh"
-    ), # add pipe into withSpinner() eventually
+    ) %>% with_custom_spinner(),
 
     # Relevant code
     accordion(
@@ -21,7 +21,7 @@ mod_umap_ui <- function(id) {
       accordion_panel(
         title = "Meta Table",
         # Output: Metadata table
-        tableOutput(ns("meta_table"))
+        tableOutput(ns("meta_table")) %>% with_custom_spinner()
       ),
       accordion_panel(
         title = "Relevant Code",

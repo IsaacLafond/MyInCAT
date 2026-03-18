@@ -21,7 +21,7 @@ mod_deg_plots_ui <- function(id, feature_choices) {
       ns("dot_plot"),
       width = "100%",
       height = "66vh"
-    )
+    ) %>% with_custom_spinner()
   )
 }
 
