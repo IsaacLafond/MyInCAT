@@ -13,6 +13,7 @@ mod_deg_plots_ui <- function(id, feature_choices) {
       multiple = TRUE,
       search = TRUE,
       showSelectedOptionsFirst = TRUE,
+      disableSelectAll = TRUE,
       updateOn = "close",
       inline = FALSE,
       width = NULL

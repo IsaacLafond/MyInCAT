@@ -17,7 +17,7 @@ mod_umap_ui <- function(id) {
 
     # Relevant code
     accordion(
-      id = ns("umap_code_accordion"),
+      id = ns("meta_accordion"),
       accordion_panel(
         title = "Meta Table",
         # Output: Metadata table
@@ -25,7 +25,7 @@ mod_umap_ui <- function(id) {
       ),
       accordion_panel(
         title = "Relevant Code",
-        umap_code()
+        code_block(umap_code)
       ),
       open = FALSE,
       class = "mb-5"

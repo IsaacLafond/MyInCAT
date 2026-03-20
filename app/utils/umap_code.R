@@ -1,6 +1,4 @@
-umap_code <- function() {
-
-  tags$code(r"(# UMAPs
+umap_code <- r"(# UMAPs
 
 ## UMAP by cluster, subcluster, sample, or experiment
 
@@ -40,6 +38,4 @@ table(sc_combined$experiment) # per experiment
 table(sc_combined$orig.ident) # per sample
 table(sc_combined$seurat_clusters) # per cluster
 table(sc_combined$subcluster) # per subcluster
-```)",
-    style = "display: block; white-space: pre;")
-}
+```)"

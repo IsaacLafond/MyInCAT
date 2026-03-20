@@ -12,6 +12,8 @@ library(ggplot2)
 library(dplyr)
 
 # Utils
+source("utils/umap_code.R")
+source("utils/deg_code.R")
 source("utils/choices.R")
 
 # UI app modules
@@ -26,7 +28,7 @@ source("ui/home_ui.R")
 source("ui/custom_spinner.R")
 source("ui/coming_soon.R")
 source("ui/color_picker.R")
-source("ui/umap_code.R")
+source("ui/code_block.R")
 
 # Set static resource path to www directory
 addResourcePath(prefix = "www", directoryPath = "www")
@@ -125,10 +127,14 @@ server <- function(input, output, session) {
 
     list(
       group_by = groupby_choices[[selected_options$group_by]],
+      experiment = selected_options$experiments,
+      orig.ident = selected_options$orig.ident,
+      seurat_clusters = selected_options$clusters,
+      subcluster = selected_options$subclusters,
       sc_subset = subset(
         sc_combined,
         subset =  experiment %in% selected_options$experiments &
-                  orig.ident %in% selected_options$samples &
+                  orig.ident %in% selected_options$orig.ident &
                   seurat_clusters %in% selected_options$clusters &
                   subcluster %in% selected_options$subclusters
       )

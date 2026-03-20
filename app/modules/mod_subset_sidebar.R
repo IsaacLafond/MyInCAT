@@ -22,57 +22,12 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
           #   choices = experiments,
           #   selected = experiments,
           #   options = pickerOptions(
-          #     actionsBox = TRUE,
-          #     size = 10,
-          #     dropdownAlignRight = 'auto'
-          #   ),
-          #   multiple = TRUE
-          # ),
 
           # div(id = ns("experiment_container"))
 
-          # pickerInput( # AKA orig.ident
-          #   inputId = ns("samples"),
-          #   label = "Samples:",
-          #   choices = samples,
-          #   selected = samples,
-          #   options = pickerOptions(
-          #     actionsBox = TRUE,
-          #     size = 10,
-          #     dropdownAlignRight = 'auto'
-          #   ),
-          #   multiple = TRUE
-          # ),
-
           # div(id = ns("sample_container")),
-          
-          # pickerInput(
-          #   inputId = ns("clusters"),
-          #   label = "Clusters:",
-          #   choices = clusters,
-          #   selected = clusters,
-          #   options = pickerOptions(
-          #     actionsBox = TRUE,
-          #     size = 10,
-          #     dropdownAlignRight = 'auto'
-          #   ),
-          #   multiple = TRUE
-          # ),
 
           # div(id = ns("cluster_container")),
-          
-          # pickerInput(
-          #   inputId = ns("subclusters"),
-          #   label = "Subclusters:",
-          #   choices = subclusters,
-          #   selected = subclusters,
-          #   options = pickerOptions(
-          #     actionsBox = TRUE,
-          #     size = 10,
-          #     dropdownAlignRight = 'auto'
-          #   ),
-          #   multiple = TRUE
-          # ),
           
           # div(id = ns("subcluster_container")),
 
@@ -169,7 +124,7 @@ mod_subset_sidebar_server <- function(id, tree_map) {
       list(
         group_by    = input$group_by,
         experiments = intersect(selected_labels, tree_map$experiment),
-        samples     = intersect(selected_labels, tree_map$orig.ident),
+        orig.ident  = intersect(selected_labels, tree_map$orig.ident),
         clusters    = intersect(selected_labels, tree_map$seurat_clusters),
         subclusters = intersect(selected_labels, tree_map$subcluster)
       )
