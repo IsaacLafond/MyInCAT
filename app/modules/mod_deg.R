@@ -29,13 +29,13 @@ mod_deg_ui <- function(id) {
         column(
           width = 6,
           class = "d-flex justify-content-center",
-          sliderInput(
+          numericInput(
             ns("pval_cutoff"),
             label = "Adjusted p-value Cutoff:",
             value = 0.05,
             min = 0,
             max = 1,
-            step = 0.001
+            step = 0.01
           )
         ),
         column(
@@ -181,7 +181,13 @@ mod_deg_server <- function(id, global_state) {
     })
 
     # 3. Render the output table
-    output$deg_table <- renderTable({
+    output$deg_table <- renderTable(
+      width = "100%",
+      striped = TRUE,
+      hover = TRUE,
+      bordered = TRUE,
+      rownames = TRUE,
+      {
       # Extracts the reactive data frame
       req(deg_results()) 
       deg_results()
