@@ -114,7 +114,12 @@ mod_deg_server <- function(id, global_state) {
       state <- global_state()
 
       # Update ident.1 and ident.2 choices based on current group_by levels
-      idents <- state[[state$group_by]]
+      idents <- list(
+        Experiments = state$experiment,
+        Samples = state$orig.ident,
+        Clusters = state$seurat_clusters,
+        Subclusters = state$subcluster
+      )
 
       updateSelectizeInput(
         session,
