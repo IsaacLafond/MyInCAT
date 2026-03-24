@@ -40,12 +40,20 @@ mod_deg_ui <- function(id) {
         ),
         column(
           width = 6,
-          class = "d-flex justify-content-center",
+          class = "d-flex justify-content-evenly",
           numericInput(
-            ns("logfc_cutoff"),
-            label = "Absolute avg_log2FC Cutoff:",
+            ns("lower_logfc_cutoff"),
+            label = "Lower avg_log2FC Cutoff:",
+            value = -0.2,
+            step = 0.1,
+            width = "33%"
+          ),
+          numericInput(
+            ns("upper_logfc_cutoff"),
+            label = "Upper avg_log2FC Cutoff:",
             value = 0.2,
-            step = 0.1
+            step = 0.1,
+            width = "33%"
           )
         )
       ),
@@ -177,7 +185,10 @@ mod_deg_server <- function(id, global_state) {
       # Apply user-defined cutoffs
       filtered_degs <- subset(
         na.omit(raw_degs), 
-        p_val_adj < input$pval_cutoff & abs(avg_log2FC) > input$logfc_cutoff
+        # p_val_adj < input$pval_cutoff & abs(avg_log2FC) > input$logfc_cutoff # old filter
+        p_val_adj < input$pval_cutoff &
+        avg_log2FC < input$lower_logfc_cutoff &
+        avg_log2FC > input$upper_logfc_cutoff
       )
       print(paste("Done!", Sys.time()))
       print("===============================")
