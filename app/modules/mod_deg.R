@@ -123,10 +123,22 @@ mod_deg_server <- function(id, global_state) {
 
       # Update ident.1 and ident.2 choices based on current group_by levels
       idents <- list(
-        Experiments = state$experiment,
-        Samples = state$orig.ident,
-        Clusters = state$seurat_clusters,
-        Subclusters = state$subcluster
+        Experiments = setNames(
+          paste0("experiment::", state$experiment),
+          state$experiment
+        ),
+        Samples = setNames(
+          paste0("orig.ident::", state$orig.ident),
+          state$orig.ident
+        ),
+        Clusters = setNames(
+          paste0("seurat_clusters::", state$seurat_clusters),
+          state$seurat_clusters
+        ),
+        Subclusters = setNames(
+          paste0("subcluster::", state$subcluster),
+          state$subcluster
+        )
       )
 
       updateSelectizeInput(
@@ -153,6 +165,11 @@ mod_deg_server <- function(id, global_state) {
       
       # Get the current subsetted object
       state <- global_state()
+
+      # strip prefixes from idents and remove dupes
+      strip_prefix <- function(x) sub("^[^:]+::", "", x)
+      ident_1_vals <- unique(strip_prefix(input$ident_1))
+      ident_2_vals <- unique(strip_prefix(input$ident_2))
       
       ## EXAMPLE -
       # If we wanted to get DEGs for satellite cells in LLC and C26 models compared to controls.
@@ -165,15 +182,16 @@ mod_deg_server <- function(id, global_state) {
       print("===============================")
       print(paste("Running FindMarkers", Sys.time()))
       print("Comparison groups (ident.1):")
-      print(input$ident_1)
+      print(ident_1_vals)
       print("Reference groups (ident.2):")
-      print(input$ident_2)
+      print(ident_2_vals)
+
       # Run FindMarkers (fetching all, filtering happens next)
       raw_degs <- FindMarkers(
         state$sc_subset,
         group.by = state$group_by,
-        ident.1 = input$ident_1,
-        ident.2 = input$ident_2,
+        ident.1 = ident_1_vals,
+        ident.2 = ident_2_vals,
         logfc.threshold = 0,
         min.pct = 0.10,
         verbose = TRUE
@@ -187,8 +205,8 @@ mod_deg_server <- function(id, global_state) {
         na.omit(raw_degs), 
         # p_val_adj < input$pval_cutoff & abs(avg_log2FC) > input$logfc_cutoff # old filter
         p_val_adj < input$pval_cutoff &
-        avg_log2FC < input$lower_logfc_cutoff &
-        avg_log2FC > input$upper_logfc_cutoff
+        avg_log2FC > input$lower_logfc_cutoff &
+        avg_log2FC < input$upper_logfc_cutoff
       )
       print(paste("Done!", Sys.time()))
       print("===============================")

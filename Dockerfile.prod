@@ -55,6 +55,9 @@ RUN R -e "options(warn=2); remotes::install_github('bnprks/BPCells/r')"
 # CSS loaders
 RUN R -e "options(warn=2); install.packages('shinycssloaders')"
 
+# Datatable
+RUN R -e "options(warn=2); install.packages('DT')"
+
 # Install Seurat disk
 # RUN R -e "options(warn=2); install.packages('hdf5r')"
 # RUN R -e "options(warn=2); remotes::install_github('mojaveazure/seurat-disk')"

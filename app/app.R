@@ -1,3 +1,4 @@
+
 # UI
 library(shiny)
 library(bslib)
@@ -5,6 +6,7 @@ library(bslib)
 library(shinyWidgets)
 library(shinycssloaders)
 library(colourpicker)
+library(DT)
 # Analysis
 library(Seurat)
 library(BPCells)
@@ -128,10 +130,6 @@ server <- function(input, output, session) {
       "Cluster" = "seurat_clusters",
       "Subcluster" = "subcluster"
     )
-
-    print("selected_options")
-    print(selected_options)
-
 
     list(
       group_by = groupby_choices[[selected_options$group_by]],
