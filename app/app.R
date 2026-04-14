@@ -110,7 +110,12 @@ ui <- page_fillable(
 )
 
 server <- function(input, output, session) {
-  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", tree_data)
+  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", list(
+    experiment = levels(sc_combined$experiment),
+    orig.ident = levels(sc_combined$orig.ident),
+    seurat_clusters = levels(sc_combined$seurat_clusters),
+    subcluster = levels(sc_combined$subcluster)
+  ))
 
   global_state <- reactive({
     req(sidebar_data())
@@ -123,6 +128,9 @@ server <- function(input, output, session) {
       "Cluster" = "seurat_clusters",
       "Subcluster" = "subcluster"
     )
+
+    print("selected_options")
+    print(selected_options)
 
 
     list(

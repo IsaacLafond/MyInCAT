@@ -123,10 +123,10 @@ mod_subset_sidebar_server <- function(id, tree_map) {
 
       list(
         group_by    = input$group_by,
-        experiments = intersect(selected_labels, tree_map$experiment),
-        orig.ident  = intersect(selected_labels, tree_map$orig.ident),
-        clusters    = intersect(selected_labels, tree_map$seurat_clusters),
-        subclusters = intersect(selected_labels, tree_map$subcluster)
+        experiments = tree_map$experiment[tree_map$experiment %in% selected_labels],
+        orig.ident  = tree_map$orig.ident[tree_map$orig.ident %in% selected_labels],
+        clusters    = tree_map$seurat_clusters[tree_map$seurat_clusters %in% selected_labels],
+        subclusters = tree_map$subcluster[tree_map$subcluster %in% selected_labels]
       )
     }, ignoreNULL = FALSE) # Load defaults on start
 
