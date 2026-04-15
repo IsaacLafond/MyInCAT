@@ -14,7 +14,6 @@ mod_deg_plots_ui <- function(id, feature_choices) {
       search = TRUE,
       showSelectedOptionsFirst = TRUE,
       disableSelectAll = TRUE,
-      updateOn = "close",
       inline = FALSE,
       width = NULL
     ),
@@ -33,44 +32,34 @@ mod_deg_plots_ui <- function(id, feature_choices) {
 mod_deg_plots_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
 
-    # plot_payload <- reactive({
-    #   req(sidebar_selections(), sc_object(), input$features)
+    features_on_close <- reactiveVal(NULL)
 
-    #   selected_options <- sidebar_selections()
-    #   group_val <- groupby_choices[[selected_options$group_by]]
-
-    #   list(
-    #     sc_object = sc_object(),
-    #     sidebar = sidebar_selections(),
-    #     features = input$features
-    #   )
-    # })
+    observeEvent(input$features_open, {
+      print(input$features_open)
+      if (isFALSE(input$features_open)) {
+        features_on_close(input$features)
+      }
+    })
 
     output$dot_plot <- renderPlot({
-      # payload <- plot_payload()
-
-      # req(sidebar_selections(), sc_object())
       state <- global_state()
+      features <- features_on_close()
 
       validate(
-        need(length(input$features) > 0, "Please select at least one feature to display the plot."),
-        need(length(input$features) <= 75, "Please select no more than 75 features.")
+        need(length(features) > 0, "Please select at least one feature to display the plot."),
+        need(length(features) <= 75, "Please select no more than 75 features.")
       )
 
-      if (!input$features_open) {
-        # hist(rnorm(100), main = "Placeholder")
-        DotPlot(
-          state$sc_subset,
-          features = input$features,
-          group.by = state$group_by
-        ) +
-        theme(
-          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"),
-          axis.text.y = element_text(face = "italic")
-        ) +
-        scale_color_gradientn(colors = c("red", "white", "blue"))
-
-      }
+      DotPlot(
+        state$sc_subset,
+        features = features,
+        group.by = state$group_by
+      ) +
+      theme(
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"),
+        axis.text.y = element_text(face = "italic")
+      ) +
+      scale_color_gradientn(colors = c("red", "white", "blue"))
 
     })
 
