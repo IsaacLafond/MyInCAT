@@ -75,7 +75,7 @@ mod_deg_ui <- function(id) {
         accordion_panel(
           title = "DEG Results",
           # Output: DEG results table
-          tableOutput(ns("deg_table")) %>% with_custom_spinner(),
+          dataTableOutput(ns("deg_table")) %>% with_custom_spinner(),
         ),
         accordion_panel(
           title = "KEGG",
@@ -96,7 +96,7 @@ mod_deg_ui <- function(id) {
         accordion_panel(
           title = "Included Data Meta Table",
           # Output: Metadata table
-          tableOutput(ns("meta_table")) %>% with_custom_spinner()
+          dataTableOutput(ns("meta_table")) %>% with_custom_spinner()
         ),
         accordion_panel(
           title = "Relevant Code",
@@ -215,11 +215,8 @@ mod_deg_server <- function(id, global_state) {
     })
 
     # 3. Render the output table
-    output$deg_table <- renderTable(
+    output$deg_table <- renderDataTable(
       width = "100%",
-      striped = TRUE,
-      hover = TRUE,
-      bordered = TRUE,
       rownames = TRUE,
       {
       # Extracts the reactive data frame
@@ -228,11 +225,8 @@ mod_deg_server <- function(id, global_state) {
     })
 
     # Populate placeholder metadata table
-    output$meta_table <- renderTable(
+    output$meta_table <- renderDataTable(
       width = "100%",
-      striped = TRUE,
-      hover = TRUE,
-      bordered = TRUE,
       # content:
       {
         req(global_state())

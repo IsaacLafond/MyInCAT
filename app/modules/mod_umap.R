@@ -21,7 +21,7 @@ mod_umap_ui <- function(id) {
       accordion_panel(
         title = "Meta Table",
         # Output: Metadata table
-        tableOutput(ns("meta_table")) %>% with_custom_spinner()
+        dataTableOutput(ns("meta_table")) %>% with_custom_spinner()
       ),
       accordion_panel(
         title = "Relevant Code",
@@ -66,11 +66,8 @@ mod_umap_server <- function(id, global_state) {
     })
 
     # Populate placeholder metadata table
-    output$meta_table <- renderTable(
+    output$meta_table <- renderDataTable(
       width = "100%",
-      striped = TRUE,
-      hover = TRUE,
-      bordered = TRUE,
       # content:
       {
         req(global_state())
