@@ -5,23 +5,73 @@ mod_deg_plots_ui <- function(id, feature_choices) {
   ns <- NS(id)
 
   page_fillable(
-    # content:
-    virtualSelectInput(
-      inputId = ns("features"),
-      label = "Select features:",
-      choices = feature_choices,
-      multiple = TRUE,
-      search = TRUE,
-      showSelectedOptionsFirst = TRUE,
-      disableSelectAll = TRUE,
-      inline = FALSE,
-      width = NULL
+    # plot type select input
+    selectInput(
+      ns("plot_type"),
+      label = "Select plot type:",
+      choices = c("Dot Plot" = "dot", "Violin Plot" = "violin", "Box Plot" = "box"),
+      selected = "dot"
     ),
-    plotOutput(
-      ns("dot_plot"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner()
+
+    conditionalPanel(
+      condition = "input.plot_type == 'dot'",
+      ns = ns,
+      # content:
+      virtualSelectInput(
+        inputId = ns("dot_features"),
+        label = "Select features:",
+        choices = feature_choices,
+        multiple = TRUE,
+        search = TRUE,
+        showSelectedOptionsFirst = TRUE,
+        disableSelectAll = TRUE,
+        inline = FALSE,
+        width = NULL
+      ),
+      plotOutput(
+        ns("dot_plot"),
+        width = "100%",
+        height = "66vh"
+      ) %>% with_custom_spinner()
+    ),
+
+    conditionalPanel(
+      condition = "input.plot_type == 'violin'",
+      ns = ns,
+      # content:
+      virtualSelectInput(
+        inputId = ns("vln_features"),
+        label = "Select feature:",
+        choices = feature_choices,
+        search = TRUE,
+        inline = FALSE,
+        width = NULL
+      ),
+      plotOutput(
+        ns("vln_plot"),
+        width = "100%",
+        height = "66vh"
+      ) %>% with_custom_spinner()
+    ),
+
+    conditionalPanel(
+      condition = "input.plot_type == 'box'",
+      ns = ns,
+      # content:
+      virtualSelectInput(
+        inputId = ns("box_features"),
+        label = "Select feature:",
+        choices = feature_choices,
+        search = TRUE,
+        inline = FALSE,
+        width = NULL
+      ),
+      plotOutput(
+        ns("box_plot"),
+        width = "100%",
+        height = "66vh"
+      ) %>% with_custom_spinner()
+    )
   )
 }
 
@@ -34,10 +84,9 @@ mod_deg_plots_server <- function(id, global_state) {
 
     features_on_close <- reactiveVal(NULL)
 
-    observeEvent(input$features_open, {
-      print(input$features_open)
-      if (isFALSE(input$features_open)) {
-        features_on_close(input$features)
+    observeEvent(input$dot_features_open, {
+      if (isFALSE(input$dot_features_open)) {
+        features_on_close(input$dot_features)
       }
     })
 
@@ -60,6 +109,76 @@ mod_deg_plots_server <- function(id, global_state) {
         axis.text.y = element_text(face = "italic")
       ) +
       scale_color_gradientn(colors = c("red", "white", "blue"))
+
+    })
+
+    output$vln_plot <- renderPlot({
+      state <- global_state()
+      feature <- input$vln_features
+
+      validate(
+        need(!is.null(feature), "Please select a feature to display the plot."),
+      )
+
+      # print(
+      #   AverageExpression(state$sc_subset, features = gene_name)#$RNA[gene_name, ]
+      # )
+
+      VlnPlot(
+        state$sc_subset, 
+        features = feature,
+        pt.size = 0,
+        group.by = state$group_by
+        # cols = c("#cluster_name_1" = "#colour_1", "#cluster_name_2" = "#colour_2", "#etc.") # LEAVE BLANK FOR DEFAULT COLOURS
+      ) +
+      theme(
+        legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        plot.title = element_text(face = "italic")
+      ) +
+      labs(x = NULL, y = "Expression", title = feature)
+
+    })
+
+    output$box_plot <- renderPlot({
+      state <- global_state()
+      feature <- input$box_features
+
+      validate(
+        need(!is.null(feature), "Please select a feature to display the plot."),
+      )
+
+      # print(
+      #   AverageExpression(state$sc_subset, features = gene_name)#$RNA[gene_name, ]
+      # )
+
+      ggplot(FetchData(
+        state$sc_subset,
+        vars = c(feature, state$group_by)
+      ), aes(
+        x = !!sym(state$group_by),
+        y = !!sym(feature),
+        fill = !!sym(state$group_by)
+      )) +
+      geom_boxplot(outlier.shape = NA, width = 0.6) +
+      # scale_fill_manual(
+      #   values = c(
+      #     "#sample_name_1" = "#colour_1",
+      #     "#sample_name_2" = "#colour_2"
+      #     # Leave blank for default colors
+      #   )
+      # ) +
+      theme_classic() +
+      theme(
+        legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+        plot.title = element_text(hjust = 0.5, face = "italic")
+      ) +
+      labs(
+        x = NULL,
+        y = "Expression",
+        title = feature
+      )
 
     })
 
