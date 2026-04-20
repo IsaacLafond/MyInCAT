@@ -69,25 +69,11 @@ mod_deg_ui <- function(id) {
         )
       ),
 
-      accordion(
-        id = ns("deg_tables_accordion"),
-        class = "mt-4",
-        accordion_panel(
-          title = "DEG Results",
-          # Output: DEG results table
-          dataTableOutput(ns("deg_table")) %>% with_custom_spinner(),
-        ),
-        accordion_panel(
-          title = "KEGG",
-          # Content:
-          coming_soon() # TODO
-        ),
-        accordion_panel(
-          title = "GO",
-          # Content:
-          coming_soon() # TODO
-        )
-      ),
+      # Output: DEG results table
+      dataTableOutput(
+        ns("deg_table"),
+        height = "450px"
+      ) %>% with_custom_spinner(),
 
       hr(),
 
@@ -158,6 +144,11 @@ mod_deg_server <- function(id, global_state) {
     deg_results <- eventReactive(input$run_deg, {
       # Require the user to have selected at least one group for each
       req(input$ident_1, input$ident_2, global_state()) 
+
+      validate(
+        need(input$pval_cutoff >= 0 && input$pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1."),
+        need(input$lower_logfc_cutoff < input$upper_logfc_cutoff, "Please ensure the lower logFC cutoff is less than the upper logFC cutoff.")
+      )
       
       # Show a loading notification since FindMarkers takes time
       showNotification("Calculating DEGs... this may take a moment.", id = "deg_calc", duration = NULL, type = "message")
@@ -217,11 +208,26 @@ mod_deg_server <- function(id, global_state) {
     # 3. Render the output table
     output$deg_table <- renderDataTable(
       width = "100%",
+      options = list(
+        paging = FALSE,
+        scrollY = "300px",
+        scrollCollapse = TRUE
+      ),
       rownames = TRUE,
       {
       # Extracts the reactive data frame
-      req(deg_results()) 
-      deg_results()
+      # req(deg_results())
+
+      deg_results <- deg_results()
+
+      print(deg_results)
+
+      validate(
+        need(!is.null(deg_results), "Run the DEG analysis to see results here."),
+        # need(nrow(deg_results) > 0, "No DEGs found with the current cutoffs. Try adjusting the p-value or logFC thresholds.")
+      )
+
+      deg_results
     })
 
     # Populate placeholder metadata table
