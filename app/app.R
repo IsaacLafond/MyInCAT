@@ -1,4 +1,3 @@
-
 # UI
 library(shiny)
 library(bslib)
@@ -82,7 +81,6 @@ ui <- page_fillable(
     sidebar = sidebar(
       title = "Options",
       position = "right",
-      width = 250,
       fillable = TRUE,
       fill = TRUE,
       # content:
