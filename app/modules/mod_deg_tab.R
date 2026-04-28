@@ -12,14 +12,14 @@ mod_deg_tab_ui <- function(id, feature_choices) {
             mod_deg_ui(ns("degs"))
         ),
         nav_panel(
-            title = "KEGG",
-            # content:
-            coming_soon() # TODO
-        ),
-        nav_panel(
             title = "GO",
             # content:
-            coming_soon() # TODO
+            mod_deg_go_ui(ns("deg_go"))
+        ),
+        nav_panel(
+            title = "KEGG",
+            # content:
+            mod_deg_kegg_ui(ns("deg_kegg"))
         ),
         nav_panel(
             title = "Plots",
@@ -36,8 +36,10 @@ mod_deg_tab_ui <- function(id, feature_choices) {
 mod_deg_tab_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
 
+    DEGs <- mod_deg_server("degs", global_state)
+    mod_deg_go_server("deg_go", DEGs)
+
     mod_deg_plots_server("deg_plots", global_state)
-    mod_deg_server("degs", global_state)
     
   })
 }

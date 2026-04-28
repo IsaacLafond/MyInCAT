@@ -9,7 +9,12 @@ mod_deg_plots_ui <- function(id, feature_choices) {
     selectInput(
       ns("plot_type"),
       label = "Select plot type:",
-      choices = c("Dot Plot" = "dot", "Violin Plot" = "violin", "Box Plot" = "box"),
+      choices = c(
+        "Dot Plot" = "dot",
+        "Violin Plot" = "violin",
+        "Box Plot" = "box",
+        "Pseudotime Plot" = "pseudo"
+      ),
       selected = "dot"
     ),
 
@@ -71,6 +76,13 @@ mod_deg_plots_ui <- function(id, feature_choices) {
         width = "100%",
         height = "66vh"
       ) %>% with_custom_spinner()
+    ),
+
+    conditionalPanel(
+      condition = "input.plot_type == 'pseudo'",
+      ns = ns,
+      # content:
+      coming_soon() # TODO
     )
   )
 }

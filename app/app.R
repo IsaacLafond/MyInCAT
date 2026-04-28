@@ -1,3 +1,4 @@
+
 # UI
 library(shiny)
 library(bslib)
@@ -9,6 +10,7 @@ library(DT)
 # Analysis
 library(Seurat)
 library(BPCells)
+library(clusterProfiler)
 library(ggplot2)
 library(dplyr)
 
@@ -22,6 +24,8 @@ source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
 source("modules/mod_deg_tab.R")
 source("modules/mod_deg.R")
+source("modules/mod_deg_kegg.R")
+source("modules/mod_deg_go.R")
 source("modules/mod_deg_plots.R")
 
 # UI components
@@ -78,6 +82,7 @@ ui <- page_fillable(
     sidebar = sidebar(
       title = "Options",
       position = "right",
+      width = 250,
       fillable = TRUE,
       fill = TRUE,
       # content:

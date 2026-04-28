@@ -143,9 +143,11 @@ mod_deg_server <- function(id, global_state) {
     # 2. Run the DEG analysis ONLY when the button is clicked
     deg_results <- eventReactive(input$run_deg, {
       # Require the user to have selected at least one group for each
-      req(input$ident_1, input$ident_2, global_state()) 
+      req(global_state())
 
       validate(
+        need(length(input$ident_1) > 0, "Please select at least one group for Comparison (ident.1)."),
+        need(length(input$ident_2) > 0, "Please select at least one group for Reference (ident.2)."),
         need(input$pval_cutoff >= 0 && input$pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1."),
         need(input$lower_logfc_cutoff < input$upper_logfc_cutoff, "Please ensure the lower logFC cutoff is less than the upper logFC cutoff.")
       )
@@ -203,31 +205,20 @@ mod_deg_server <- function(id, global_state) {
       print("===============================")
       
       return(filtered_degs)
-    })
+    }, ignoreNULL = FALSE)
 
     # 3. Render the output table
     output$deg_table <- renderDataTable(
       width = "100%",
       options = list(
         paging = FALSE,
+        scrollX = TRUE,
         scrollY = "300px",
         scrollCollapse = TRUE
       ),
       rownames = TRUE,
       {
-      # Extracts the reactive data frame
-      # req(deg_results())
-
-      deg_results <- deg_results()
-
-      print(deg_results)
-
-      validate(
-        need(!is.null(deg_results), "Run the DEG analysis to see results here."),
-        # need(nrow(deg_results) > 0, "No DEGs found with the current cutoffs. Try adjusting the p-value or logFC thresholds.")
-      )
-
-      deg_results
+        deg_results()
     })
 
     # Populate placeholder metadata table
@@ -251,6 +242,18 @@ mod_deg_server <- function(id, global_state) {
           # ?????????????????
       }
     )
+
+    DEGs <- reactive({
+      req(deg_results())
+      results <- deg_results()
+
+      list(
+        up = results %>% filter(avg_log2FC > 0) %>% rownames(),
+        down = results %>% filter(avg_log2FC < 0) %>% rownames()
+      )
+    })
+
+    return(DEGs)
 
   })
 }

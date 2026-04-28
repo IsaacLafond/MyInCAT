@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.3.2
+FROM rocker/r-ver:4.5.3
 
 # -----------------------------
 # System dependencies
@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # patch \
     # BPCells dependencies
     libhdf5-dev \
+    # fs/ treeio/ clusterProfiler dependencies
+    libuv1-dev \
   && rm -rf /var/lib/apt/lists/*
 #     libudunits2-dev \
 #     libgdal-dev \
@@ -57,6 +59,11 @@ RUN R -e "options(warn=2); install.packages('shinycssloaders')"
 
 # Datatable
 RUN R -e "options(warn=2); install.packages('DT')"
+
+# BiocManager/Bioconductor packages
+RUN R -e "options(warn=2); install.packages('BiocManager')"
+
+RUN R -e "options(warn=2); BiocManager::install(c('clusterProfiler', 'org.Mm.eg.db'))"
 
 # Install Seurat disk
 # RUN R -e "options(warn=2); install.packages('hdf5r')"
