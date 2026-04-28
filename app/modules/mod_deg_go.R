@@ -247,76 +247,94 @@ mod_deg_go_server <- function(id, DEGs) {
       }
     })
 
+    # UP Plot
     output$go_plot_up <- renderPlot({
-      # UP
-      # up_terms <- c(#List of row numbers from DEGs_upgo for the terms that you want to plot. Is there a way to make a checklist of the enriched terms that come up so that they can pick and choose which terms to plot?)
-      # go_up <- DEGs_upgo[up_terms, ]
-      go_up <- go_results_up()@result %>% filter(Description %in% input$go_up_terms)
-
-      go_up$Description <- gsub(" - Mus musculus \\(house mouse\\)$", "", go_up$Description)
-
-      ggplot(
-        go_up,
-        aes(
-          x = .data[[input$go_up_x]], 
-          y = reorder(.data[["Description"]], .data[[input$go_up_x]]),
-          size = .data[[input$go_up_size]], 
-          color = .data[[input$go_up_color]]
-        )
-      ) +
-      geom_point() +
-      scale_color_gradient(
-        low = "blue",
-        high = "red",
-        name = input$go_up_color
-      ) +
-      labs(
-        x = input$go_up_x,
-        y = NULL, 
-        title = input$go_up_title
-      ) +
-      theme_minimal() +
-      theme(
-        axis.line = element_line(color = "black"),
-        axis.ticks = element_line(color = "black")
+      req(
+        go_results_up(),
+        input$go_up_terms,
+        input$go_up_x,
+        input$go_up_size,
+        input$go_up_color
+      )
+      
+      make_go_plot(
+        df = go_results_up()@result,
+        plot_title = input$go_up_title,
+        selected_terms = input$go_up_terms,
+        x_col = input$go_up_x,
+        size_col = input$go_up_size,
+        color_col = input$go_up_color
       )
 
     })
 
+    # DOWN Plot
     output$go_plot_down <- renderPlot({
-      # DOWN
-      # down_terms <- c(#List of row numbers from DEGs_downgo for the terms that you want to plot. Is there a way to make a checklist of the enriched terms that come up so that they can pick and choose which terms to plot?)
-      # go_down <- DEGs_downgo[down_terms, ]
-      go_down <- go_results_down()@result %>% filter(Description %in% input$go_down_terms)
+      req(
+        go_results_down(),
+        input$go_down_terms,
+        input$go_down_x,
+        input$go_down_size,
+        input$go_down_color
+      )
 
-      go_down$Description <- gsub(" - Mus musculus \\(house mouse\\)$", "", go_down$Description)
+      make_go_plot(
+        df = go_results_down()@result,
+        plot_title = input$go_down_title,
+        selected_terms = input$go_down_terms,
+        x_col = input$go_down_x,
+        size_col = input$go_down_size,
+        color_col = input$go_down_color
+      )
 
+    })
+
+    make_go_plot <- function(
+      df,
+      plot_title,
+      selected_terms,
+      x_col,
+      size_col,
+      color_col
+    ) {
+      validate(
+        need(nrow(df) > 0, "No GO terms to plot."),
+        need(selected_terms %in% df$Description, "Selected terms not found in results."),
+        need(x_col %in% colnames(df), "Invalid x-axis column."),
+        need(size_col %in% colnames(df), "Invalid size column."),
+        need(color_col %in% colnames(df), "Invalid color column.")
+      )
+
+      df <- df %>%
+        filter(Description %in% selected_terms) %>%
+        mutate(Description = gsub(" - Mus musculus \\(house mouse\\)$", "", Description))
+      
       ggplot(
-        go_down,
+        df,
         aes(
-          x = .data[[input$go_down_x]],
-          y = reorder(.data[["Description"]], .data[[input$go_down_x]]),
-          size = .data[[input$go_down_size]], 
-          color = .data[[input$go_down_color]]
+          x = .data[[x_col]],
+          y = reorder(.data[["Description"]], .data[[x_col]]),
+          size = .data[[size_col]], 
+          color = .data[[color_col]]
         )
       ) +
       geom_point() +
       scale_color_gradient(
         low = "blue",
         high = "red",
-        name = input$go_down_color
+        name = color_col
       ) +
       labs(
-        x = input$go_down_x,
+        x = x_col,
         y = NULL, 
-        title = input$go_down_title
+        title = plot_title
       ) +
       theme_minimal() +
       theme(
         axis.line = element_line(color = "black"),
         axis.ticks = element_line(color = "black")
       )
-    })
+    }
 
   })
 }
