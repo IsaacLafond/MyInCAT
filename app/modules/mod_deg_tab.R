@@ -38,6 +38,7 @@ mod_deg_tab_server <- function(id, global_state) {
 
     DEGs <- mod_deg_server("degs", global_state)
     mod_deg_go_server("deg_go", DEGs)
+    mod_deg_kegg_server("deg_kegg", DEGs)
 
     mod_deg_plots_server("deg_plots", global_state)
     
