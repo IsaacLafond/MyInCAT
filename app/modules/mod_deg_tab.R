@@ -9,22 +9,22 @@ mod_deg_tab_ui <- function(id, feature_choices) {
         nav_panel(
             title = "DEGs",
             # content:
-            mod_deg_ui("degs")
+            mod_deg_ui(ns("degs"))
         ),
         nav_panel(
             title = "GO",
             # content:
-            mod_deg_go_ui("deg_go")
+            mod_deg_go_ui(ns("deg_go"))
         ),
         nav_panel(
             title = "KEGG",
             # content:
-            mod_deg_kegg_ui("deg_kegg")
+            mod_deg_kegg_ui(ns("deg_kegg"))
         ),
         nav_panel(
             title = "Plots",
             # content:
-            mod_deg_plots_ui("deg_plots", feature_choices)
+            mod_deg_plots_ui(ns("deg_plots"), feature_choices)
         )
     )
   )

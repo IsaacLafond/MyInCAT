@@ -23,9 +23,13 @@ source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
 source("modules/mod_deg_tab.R")
 source("modules/mod_deg.R")
-source("modules/mod_deg_kegg.R")
 source("modules/mod_deg_go.R")
+source("modules/mod_deg_kegg.R")
 source("modules/mod_deg_plots.R")
+source("modules/mod_dot_plot.R")
+source("modules/mod_vln_plot.R")
+source("modules/mod_box_plot.R")
+source("modules/mod_pseudotime_plot.R")
 
 # UI components
 source("ui/home_ui.R")
@@ -152,6 +156,8 @@ server <- function(input, output, session) {
 
   mod_umap_server("umap", global_state)
   mod_deg_tab_server("deg_tab", global_state)
+  mod_deg_plots_server("deg_plots", global_state)
+
 }
 
 shinyApp(ui = ui, server = server)
