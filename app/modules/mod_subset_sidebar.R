@@ -4,56 +4,54 @@
 mod_subset_sidebar_ui <- function(id, tree_data) {
   ns <- NS(id)
 
-  page_fillable(
-    accordion(
-      accordion_panel(
-        title = "Subset Options",
+  page_fluid(
+    # accordion(
+    #   accordion_panel(
+    #     title = "Subset Options",
 
-        tagList(
-          selectInput(
-            ns("group_by"),
-            "Group by:",
-            choices = names(groupby_choices)
-          ),
-
-          # pickerInput(
-          #   inputId = ns("experiments"),
-          #   label = "Experiments:",
-          #   choices = experiments,
-          #   selected = experiments,
-          #   options = pickerOptions(
-
-          # div(id = ns("experiment_container"))
-
-          # div(id = ns("sample_container")),
-
-          # div(id = ns("cluster_container")),
-          
-          # div(id = ns("subcluster_container")),
-
-          treeInput(
-            inputId = ns("subset_tree"),
-            label = "Select Desired Elements:",
-            choices = create_tree(tree_data),
-            selected = tree_data$experiment,
-            # closeDepth = 4,
-            returnValue = "all"
-            # returnValue = c("text", "id", "all"),
-          ),
-
-          actionButton(
-            inputId = ns("apply"),
-            label = "Apply Changes",
-            class = "btn_primary w-100"
-          )
-        )
-      ),
-
-        accordion_panel(
-          title = "Download Options",
-          p("Download options coming soon...")
+        selectInput(
+          ns("group_by"),
+          "Group by:",
+          choices = names(groupby_choices)
         ),
-    )
+
+        # pickerInput(
+        #   inputId = ns("experiments"),
+        #   label = "Experiments:",
+        #   choices = experiments,
+        #   selected = experiments,
+        #   options = pickerOptions(
+
+        # div(id = ns("experiment_container"))
+
+        # div(id = ns("sample_container")),
+
+        # div(id = ns("cluster_container")),
+        
+        # div(id = ns("subcluster_container")),
+
+        treeInput(
+          inputId = ns("subset_tree"),
+          label = "Select Desired Elements:",
+          choices = create_tree(tree_data),
+          selected = tree_data$experiment,
+          # closeDepth = 4,
+          returnValue = "all"
+          # returnValue = c("text", "id", "all"),
+        ),
+
+        actionButton(
+          inputId = ns("apply"),
+          label = "Apply Changes",
+          class = "btn_primary w-100 mb-3"
+        )
+      # ),
+
+        # accordion_panel(
+        #   title = "Download Options",
+        #   p("Download options coming soon...")
+        # ),
+    # )
   )
 }
 

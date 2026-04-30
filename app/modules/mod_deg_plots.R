@@ -4,7 +4,7 @@
 mod_deg_plots_ui <- function(id, feature_choices) {
   ns <- NS(id)
 
-  page_fillable(
+  page_fluid(
     # plot type select input
     selectInput(
       ns("plot_type"),

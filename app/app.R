@@ -81,6 +81,7 @@ ui <- page_fillable(
     sidebar = sidebar(
       title = "Options",
       position = "right",
+      width = 300,
       fillable = TRUE,
       fill = TRUE,
       # content:
