@@ -65,6 +65,18 @@ RUN R -e "options(warn=2); install.packages('BiocManager')"
 
 RUN R -e "options(warn=2); BiocManager::install(c('clusterProfiler', 'org.Mm.eg.db'))"
 
+# Install Monocle3
+# dependencies
+RUN R -e "options(warn=2); BiocManager::install(c( \
+  'DelayedArray', 'DelayedMatrixStats', \
+  'limma', 'lme4', 'SingleCellExperiment', \
+  'SummarizedExperiment', 'batchelor', 'HDF5Array', 'ggrastr' \
+  ))"
+RUN R -e "install.packages('https://cran.r-project.org/src/contrib/Archive/grr/grr_0.9.5.tar.gz', \
+  repos = NULL, \
+  type = 'source')"
+RUN R -e "options(warn=2); remotes::install_github('cole-trapnell-lab/monocle3')"
+
 # Install Seurat disk
 # RUN R -e "options(warn=2); install.packages('hdf5r')"
 # RUN R -e "options(warn=2); remotes::install_github('mojaveazure/seurat-disk')"

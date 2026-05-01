@@ -10,6 +10,8 @@ library(DT)
 library(Seurat)
 library(BPCells)
 library(clusterProfiler)
+library(org.Mm.eg.db)
+library(monocle3)
 library(ggplot2)
 library(dplyr)
 
