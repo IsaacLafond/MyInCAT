@@ -28,12 +28,12 @@ mod_cellchat_tab_ui <- function(id) {
 # -------------------------
 # CellChat Tab server
 # -------------------------
-mod_cellchat_tab_server <- function(id) {
+mod_cellchat_tab_server <- function(id, cellchat_object) {
   moduleServer(id, function(input, output, session) {
 
-    mod_cellchat_enrichedpathways_server("enriched_pathways")
-    mod_cellchat_cellinteractions_server("cell_interactions")
-    mod_cellchat_plots_server("cellchat_plots")
-    
+    mod_cellchat_enrichedpathways_server("enriched_pathways", cellchat_object)
+    mod_cellchat_cellinteractions_server("cell_interactions", cellchat_object)
+    mod_cellchat_plots_server("cellchat_plots", cellchat_object)
+
   })
 }

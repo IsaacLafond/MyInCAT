@@ -12,7 +12,7 @@ mod_cellchat_plots_ui <- function(id) {
 # -------------------------
 # CellChat Plots server
 # -------------------------
-mod_cellchat_plots_server <- function(id) {
+mod_cellchat_plots_server <- function(id, cellchat_object) {
   moduleServer(id, function(input, output, session) {
     
   })

@@ -5,15 +5,73 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
   ns <- NS(id)
 
   page_fluid(
+
+    conditionalPanel(
+      condition = "input.main_navbar != 'cellchat'",
+      # content:
+      selectInput(
+        ns("group_by"),
+        "Group by:",
+        choices = names(groupby_choices)
+      ),
+
+      treeInput(
+        inputId = ns("subset_tree"),
+        label = "Select Desired Elements:",
+        choices = create_tree(tree_data),
+        selected = tree_data$experiment,
+        # closeDepth = 4,
+        returnValue = "all"
+        # returnValue = c("text", "id", "all"),
+      )
+    ),
+
+    conditionalPanel(
+      condition = "input.main_navbar == 'cellchat'",
+      # content:
+      selectInput(
+        ns("cellchat_sample"),
+        label = "Select sample:",
+        choices = c(
+          "Agca_snLLC_CTL",
+          "Agca_snLLC_LLC",
+          "Brown_scLLC_CTL",
+          "Brown_scLLC_2w",
+          "Brown_scLLC_2.5w",
+          "Brown_scLLC_3.5w",
+          "Kim_scB16F10_CTL",
+          "Kim_scB16F10_B16F10",
+          "Pryce_scC26_CTL",
+          "Pryce_scC26_C26",
+          "Pryce_scKPP_CTL",
+          "Pryce_scKPP_KPP",
+          "Zhang_snKIC_CTL",
+          "Zhang_snKIC_KIC"
+        )
+      ),
+
+      selectInput(
+        ns("cellchat_interaction_type"),
+        label = "Select interaction type:",
+        choices = c(
+          "all",
+          "secreted",
+          "ECM",
+          "ccc",
+          "nps"
+        )
+      )
+    ),
+
+    actionButton(
+      inputId = ns("apply"),
+      label = "Apply Changes",
+      class = "btn_primary w-100 mb-3"
+    )
+
     # accordion(
     #   accordion_panel(
     #     title = "Subset Options",
-
-        selectInput(
-          ns("group_by"),
-          "Group by:",
-          choices = names(groupby_choices)
-        ),
 
         # pickerInput(
         #   inputId = ns("experiments"),
@@ -30,21 +88,6 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
         
         # div(id = ns("subcluster_container")),
 
-        treeInput(
-          inputId = ns("subset_tree"),
-          label = "Select Desired Elements:",
-          choices = create_tree(tree_data),
-          selected = tree_data$experiment,
-          # closeDepth = 4,
-          returnValue = "all"
-          # returnValue = c("text", "id", "all"),
-        ),
-
-        actionButton(
-          inputId = ns("apply"),
-          label = "Apply Changes",
-          class = "btn_primary w-100 mb-3"
-        )
       # ),
 
         # accordion_panel(
@@ -62,6 +105,61 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
 mod_subset_sidebar_server <- function(id, current_tab, tree_map) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # output$current_tab <- reactive({ current_tab() })
+    # outputOptions(output, "current_tab", suspendWhenHidden = FALSE)
+
+    seurat_subset_params <- reactiveVal(NULL)
+    seurat_group_by <- reactiveVal(NULL)
+    cellchat_state <- reactiveVal(NULL)
+
+    observeEvent(input$apply, {
+      req(
+        input$group_by,
+        input$subset_tree,
+        input$cellchat_sample,
+        input$cellchat_interaction_type
+      )
+
+      get_subset_only <- function() {
+        tree_raw <- input$subset_tree
+        selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
+
+        list(
+          experiments = tree_map$experiment[tree_map$experiment %in% selected_labels],
+          orig.ident  = tree_map$orig.ident[tree_map$orig.ident %in% selected_labels],
+          seurat_clusters = tree_map$seurat_clusters[tree_map$seurat_clusters %in% selected_labels],
+          subcluster = tree_map$subcluster[tree_map$subcluster %in% selected_labels]
+        )
+      }
+
+      get_cellchat_selections <- function() {
+        list(
+          sample = input$cellchat_sample,
+          interaction_type = input$cellchat_interaction_type
+        )
+      }
+
+      if (input$apply ==0) {
+        # Initial load
+        seurat_subset_params(get_subset_only())
+        seurat_group_by(input$group_by)
+        cellchat_state(get_cellchat_selections())
+      } else if (current_tab() == "cellchat") {
+        # Only update CellChat state
+        cellchat_state(get_cellchat_selections())
+      } else {
+        # Update Seurat subset and group_by
+        seurat_subset_params(get_subset_only())
+        seurat_group_by(input$group_by)
+      }
+    }, ignoreNULL = FALSE) # Load defaults on start
+
+    return(list(
+      seurat_subset = seurat_subset_params,
+      seurat_groupby = seurat_group_by,
+      cellchat = cellchat_state
+    ))
 
     # # 1. Define the categories we want to manage
     # categories <- list(
@@ -112,23 +210,6 @@ mod_subset_sidebar_server <- function(id, current_tab, tree_map) {
     #     prev_states[[cat_name]](current_vals)
     #   })
     # })
-
-    # eventReactive so downstream modules only update when "Apply Changes" is clicked.
-    selections <- eventReactive(input$apply, {
-      req(input$group_by, input$subset_tree)
-      tree_raw <- input$subset_tree
-      selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
-
-      list(
-        group_by    = input$group_by,
-        experiments = tree_map$experiment[tree_map$experiment %in% selected_labels],
-        orig.ident  = tree_map$orig.ident[tree_map$orig.ident %in% selected_labels],
-        clusters    = tree_map$seurat_clusters[tree_map$seurat_clusters %in% selected_labels],
-        subclusters = tree_map$subcluster[tree_map$subcluster %in% selected_labels]
-      )
-    }, ignoreNULL = FALSE) # Load defaults on start
-
-    return(selections)
 
     # ===== Old olor picker code (was in reactive block?) =====
     # # Helper function to match labels to their dynamic color inputs

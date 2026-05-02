@@ -103,33 +103,35 @@ ui <- page_fillable(
     # Home tab
     nav_panel(
       title = "Home",
+      value = "home",
       home_ui()
     ),
 
     # UMAP tab
     nav_panel(
       title = "UMAP",
+      value = "umap",
       mod_umap_ui("umap")
     ),
 
     # DEGs tab
     nav_panel(
       title = "DEGs",
+      value = "deg",
       mod_deg_tab_ui("deg_tab", rna_features)
     ),
 
     # CellChat tab
     nav_panel(
       title = "CellChat",
+      value = "cellchat",
       mod_cellchat_tab_ui("cellchat_tab")
     )
   )
 )
 
 server <- function(input, output, session) {
-  current_tab <- reactive({
-    input$main_navbar
-  })
+  current_tab <- reactive(input$main_navbar)
 
   sidebar_data <- mod_subset_sidebar_server("subset_sidebar", current_tab, list(
     experiment = levels(sc_combined$experiment),
@@ -138,38 +140,69 @@ server <- function(input, output, session) {
     subcluster = levels(sc_combined$subcluster)
   ))
 
-  global_state <- reactive({
-    req(sidebar_data())
-    selected_options <- sidebar_data()
-
-    groupby_choices <- c(
-      # "None" = NULL,
-      "Experiment" = "experiment",
-      "Sample" = "orig.ident",
-      "Cluster" = "seurat_clusters",
-      "Subcluster" = "subcluster"
-    )
-
+  # -------------------------
+  # 1. The Heavy Lifter (Isolated)
+  # -------------------------
+  # This ONLY invalidates if sidebar_data$seurat_subset() changes.
+  # Changing the group_by dropdown will NOT trigger this block.
+  filtered_seurat <- reactive({
+    req(sidebar_data$seurat_subset())
+    opts <- sidebar_data$seurat_subset()
+    
     list(
-      group_by = groupby_choices[[selected_options$group_by]],
-      experiment = selected_options$experiments,
-      orig.ident = selected_options$orig.ident,
-      seurat_clusters = selected_options$clusters,
-      subcluster = selected_options$subclusters,
+      experiment = opts$experiments,
+      orig.ident = opts$orig.ident,
+      seurat_clusters = opts$seurat_clusters,
+      subcluster = opts$subcluster,
       sc_subset = subset(
         sc_combined,
-        subset =  experiment %in% selected_options$experiments &
-                  orig.ident %in% selected_options$orig.ident &
-                  seurat_clusters %in% selected_options$clusters &
-                  subcluster %in% selected_options$subclusters
+        subset =  experiment %in% opts$experiments & 
+                  orig.ident %in% opts$orig.ident & 
+                  seurat_clusters %in% opts$seurat_clusters & 
+                  subcluster %in% opts$subcluster
       )
     )
   })
+  
+  # -------------------------
+  # 2. The Global State Assembler
+  # -------------------------
+  # This invalidates when EITHER group_by or the subset changes.
+  # But if only group_by changes, it just grabs the ALREADY CACHED result 
+  # of filtered_seurat() without re-running the subsetting math!
+  global_seurat_state <- reactive({
 
-  mod_umap_server("umap", global_state)
-  mod_deg_tab_server("deg_tab", global_state)
-  mod_deg_plots_server("deg_plots", global_state)
-  mod_cellchat_tab_server("cellchat_tab")
+    filtered_seurat <- filtered_seurat()
+    
+    list(
+      group_by = groupby_choices[[sidebar_data$seurat_groupby()]],
+      experiment = filtered_seurat$experiment,
+      orig.ident = filtered_seurat$orig.ident,
+      seurat_clusters = filtered_seurat$seurat_clusters,
+      subcluster = filtered_seurat$subcluster,
+      sc_subset = filtered_seurat$sc_subset
+    )
+  })
+  
+  # -------------------------
+  # 3. CellChat State
+  # -------------------------
+  global_cellchat_state <- reactive({
+    req(sidebar_data$cellchat())
+    selected_options <- sidebar_data$cellchat()
+    
+    # Get path of the object based on inputs
+    obj_name <- paste("cellchat", selected_options$sample, selected_options$interaction_type, sep = "_")
+    path <- paste0("data/cellchat/", obj_name, ".rds")
+    cellchat_object <- readRDS(path)
+
+    cellchat_object
+  })
+
+  mod_umap_server("umap", global_seurat_state)
+  mod_deg_tab_server("deg_tab", global_seurat_state)
+  mod_deg_plots_server("deg_plots", global_seurat_state)
+  mod_cellchat_tab_server("cellchat_tab", global_cellchat_state)
 
 }
 

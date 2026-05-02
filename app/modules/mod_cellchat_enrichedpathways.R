@@ -5,40 +5,6 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
   ns <- NS(id)
 
   page_fluid(
-    layout_columns(
-      col_widths = c(6, 6),
-      selectInput(
-        ns("sample"),
-        label = "Select sample:",
-         choices = c(
-          "Agca_snLLC_CTL",
-          "Agca_snLLC_LLC",
-          "Brown_scLLC_CTL",
-          "Brown_scLLC_2w",
-          "Brown_scLLC_2.5w",
-          "Brown_scLLC_3.5w",
-          "Kim_scB16F10_CTL",
-          "Kim_scB16F10_B16F10",
-          "Pryce_scC26_CTL",
-          "Pryce_scC26_C26",
-          "Pryce_scKPP_CTL",
-          "Pryce_scKPP_KPP",
-          "Zhang_snKIC_CTL",
-          "Zhang_snKIC_KIC"
-        )
-      ),
-      selectInput(
-        ns("interaction_type"),
-        label = "Select interaction type:",
-        choices = c(
-          "all",
-          "secreted",
-          "ECM",
-          "ccc",
-          "nps"
-        )
-      )
-    ),
 
     card(
       card_header(
@@ -71,20 +37,8 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
 # -------------------------
 # CellChat Enriched Pathways server
 # -------------------------
-mod_cellchat_enrichedpathways_server <- function(id) {
+mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
   moduleServer(id, function(input, output, session) {
-
-    cellchat_obj <- reactive({
-      req(input$sample, input$interaction_type)
-
-      # Get path of the object based on inputs
-      obj_name <- paste("cellchat", input$sample, input$interaction_type, sep = "_")
-      path <- paste0("data/cellchat/", obj_name, ".rds")
-      cc_object <- readRDS(path)
-
-      cc_object
-
-    })
 
     output$enriched_pathways_table <- renderDataTable(
       width = "100%",
@@ -96,9 +50,9 @@ mod_cellchat_enrichedpathways_server <- function(id) {
       ),
       rownames = FALSE,
       {
-      req(cellchat_obj())
+      req(cellchat_object())
 
-      df <- as.data.frame(cellchat_obj()@netP[["pathways"]])
+      df <- as.data.frame(cellchat_object()@netP[["pathways"]])
       colnames(df)[1] <- "pathways"
 
       df
@@ -116,9 +70,9 @@ mod_cellchat_enrichedpathways_server <- function(id) {
       rownames = FALSE,
       {
 
-      req(cellchat_obj())
+      req(cellchat_object())
 
-      cc_obj <- cellchat_obj()
+      cc_obj <- cellchat_object()
 
       # Extract enriched ligand-receptor pairs per sample/interactions type.
       out <- extractEnrichedLR(
@@ -126,7 +80,6 @@ mod_cellchat_enrichedpathways_server <- function(id) {
         signaling = cc_obj@netP[["pathways"]],
         geneLR.return = TRUE
       )
-      print(out)
       out$pairLR
 
     })
