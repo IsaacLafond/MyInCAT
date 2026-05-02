@@ -59,7 +59,7 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
 # -------------------------
 # Subset sidebar server
 # -------------------------
-mod_subset_sidebar_server <- function(id, tree_map) {
+mod_subset_sidebar_server <- function(id, current_tab, tree_map) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

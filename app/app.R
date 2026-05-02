@@ -12,6 +12,7 @@ library(BPCells)
 library(clusterProfiler)
 library(org.Mm.eg.db)
 library(monocle3)
+library(CellChat)
 library(ggplot2)
 library(dplyr)
 
@@ -20,7 +21,7 @@ source("utils/umap_code.R")
 source("utils/deg_code.R")
 source("utils/choices.R")
 
-# UI app modules
+# App modules
 source("modules/mod_subset_sidebar.R")
 source("modules/mod_umap.R")
 source("modules/mod_deg_tab.R")
@@ -32,6 +33,10 @@ source("modules/mod_dot_plot.R")
 source("modules/mod_vln_plot.R")
 source("modules/mod_box_plot.R")
 source("modules/mod_pseudotime_plot.R")
+source("modules/mod_cellchat_tab.R")
+source("modules/mod_cellchat_enrichedpathways.R")
+source("modules/mod_cellchat_cellinteractions.R")
+source("modules/mod_cellchat_plots.R")
 
 # UI components
 source("ui/home_ui.R")
@@ -70,6 +75,7 @@ ui <- page_fillable(
   ),
 
   page_navbar(
+    id = "main_navbar",
     window_title = "MyInCAT",
 
     # Head with custom CSS and favicon
@@ -115,13 +121,17 @@ ui <- page_fillable(
     # CellChat tab
     nav_panel(
       title = "CellChat",
-      coming_soon() # TODO
+      mod_cellchat_tab_ui("cellchat_tab")
     )
   )
 )
 
 server <- function(input, output, session) {
-  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", list(
+  current_tab <- reactive({
+    input$main_navbar
+  })
+
+  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", current_tab, list(
     experiment = levels(sc_combined$experiment),
     orig.ident = levels(sc_combined$orig.ident),
     seurat_clusters = levels(sc_combined$seurat_clusters),
@@ -159,6 +169,7 @@ server <- function(input, output, session) {
   mod_umap_server("umap", global_state)
   mod_deg_tab_server("deg_tab", global_state)
   mod_deg_plots_server("deg_plots", global_state)
+  mod_cellchat_tab_server("cellchat_tab")
 
 }
 
