@@ -77,6 +77,12 @@ RUN R -e "install.packages('https://cran.r-project.org/src/contrib/Archive/grr/g
   type = 'source')"
 RUN R -e "options(warn=2); remotes::install_github('cole-trapnell-lab/monocle3')"
 
+# Install CellChat
+# dependencies
+RUN R -e "options(warn=2); install.packages('NMF')"
+RUN R -e "options(warn=2); BiocManager::install('ComplexHeatmap')"
+RUN R -e "options(warn=2); remotes::install_github('jinworks/CellChat')"
+
 # Install Seurat disk
 # RUN R -e "options(warn=2); install.packages('hdf5r')"
 # RUN R -e "options(warn=2); remotes::install_github('mojaveazure/seurat-disk')"
