@@ -11,7 +11,7 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
       # content:
       selectInput(
         ns("group_by"),
-        "Group by:",
+        "Compare between:",
         choices = names(groupby_choices)
       ),
 
