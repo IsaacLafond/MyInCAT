@@ -57,8 +57,7 @@ mod_dot_plot_server <- function(id, global_state) {
         group.by = state$group_by
       ) +
       theme(
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"),
-        axis.text.y = element_text(face = "italic")
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic")
       ) +
       scale_color_gradientn(colors = c("red", "white", "blue"))
 
