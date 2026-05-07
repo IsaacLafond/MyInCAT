@@ -22,7 +22,7 @@ source("utils/deg_code.R")
 source("utils/choices.R")
 
 # App modules
-source("modules/mod_subset_sidebar.R")
+source("modules/mod_sidebar.R")
 source("modules/mod_umap.R")
 source("modules/mod_deg_tab.R")
 source("modules/mod_deg.R")
@@ -55,17 +55,24 @@ sc_combined <- readRDS("data/sc_combined_shell.rds")
 sc_combined[["RNA"]]$counts <- open_matrix_dir("data/RNA_counts")
 sc_combined[["RNA"]]$data <- open_matrix_dir("data/RNA_data")
 
-# create subset tree
-tree_data <- sc_combined@meta.data %>%
-  select(experiment, orig.ident, seurat_clusters, subcluster) %>%
+# new meta
+distinct_meta <- sc_combined@meta.data %>%
+  select(orig.ident, seurat_clusters, subcluster) %>%
   distinct() %>%
-  # Arrange them to maintain consistency (arrange before string so follow factor order)
-  arrange(experiment, orig.ident, seurat_clusters) %>%
-  # Convert factors to character
+  arrange(subcluster) %>%
   mutate(across(everything(), as.character))
 
+all_choices <- list(
+  samples = unique(distinct_meta$orig.ident),
+  clusters = unique(distinct_meta$seurat_clusters),
+  subclusters = unique(distinct_meta$subcluster)
+)
+map_sample_to_cluster <- split(distinct_meta$seurat_clusters, distinct_meta$orig.ident)
+distinct_meta$sample_cluster_key <- paste(distinct_meta$orig.ident, distinct_meta$seurat_clusters, sep = "||")
+map_sample_cluster_to_subcluster <- split(distinct_meta$subcluster, distinct_meta$sample_cluster_key)
+
 # load all features (genes) for virtual multiselect
-rna_features <- readRDS("data/rna_features.rds")
+rna_features <- Features(sc_combined)
 
 
 ui <- page_fillable(
@@ -97,7 +104,7 @@ ui <- page_fillable(
       fillable = TRUE,
       fill = TRUE,
       # content:
-      mod_subset_sidebar_ui("subset_sidebar", tree_data)
+      mod_sidebar_ui("sidebar", all_choices)
     ),
 
     # Home tab
@@ -133,12 +140,12 @@ ui <- page_fillable(
 server <- function(input, output, session) {
   current_tab <- reactive(input$main_navbar)
 
-  sidebar_data <- mod_subset_sidebar_server("subset_sidebar", current_tab, list(
-    experiment = levels(sc_combined$experiment),
-    orig.ident = levels(sc_combined$orig.ident),
-    seurat_clusters = levels(sc_combined$seurat_clusters),
-    subcluster = levels(sc_combined$subcluster)
-  ))
+  sidebar_data <- mod_sidebar_server(
+    "sidebar", 
+    current_tab, 
+    all_choices, 
+    map_sample_to_cluster, map_sample_cluster_to_subcluster
+  )
 
   # -------------------------
   # 1. The Heavy Lifter (Isolated)
@@ -150,14 +157,12 @@ server <- function(input, output, session) {
     opts <- sidebar_data$seurat_subset()
     
     list(
-      experiment = opts$experiments,
       orig.ident = opts$orig.ident,
       seurat_clusters = opts$seurat_clusters,
       subcluster = opts$subcluster,
       sc_subset = subset(
         sc_combined,
-        subset =  experiment %in% opts$experiments & 
-                  orig.ident %in% opts$orig.ident & 
+        subset =  orig.ident %in% opts$orig.ident & 
                   seurat_clusters %in% opts$seurat_clusters & 
                   subcluster %in% opts$subcluster
       )
@@ -175,8 +180,7 @@ server <- function(input, output, session) {
     filtered_seurat <- filtered_seurat()
     
     list(
-      group_by = groupby_choices[[sidebar_data$seurat_groupby()]],
-      experiment = filtered_seurat$experiment,
+      group_by = sidebar_data$seurat_groupby(),
       orig.ident = filtered_seurat$orig.ident,
       seurat_clusters = filtered_seurat$seurat_clusters,
       subcluster = filtered_seurat$subcluster,
@@ -195,6 +199,8 @@ server <- function(input, output, session) {
     obj_name <- paste("cellchat", selected_options$sample, selected_options$interaction_type, sep = "_")
     path <- paste0("data/cellchat/", obj_name, ".rds")
     cellchat_object <- readRDS(path)
+
+    # print(str(cellchat_object))
 
     cellchat_object
   })

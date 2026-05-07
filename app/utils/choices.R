@@ -1,11 +1,3 @@
-groupby_choices <- c(
-  # "None" = NULL,
-  "Experiment" = "experiment",
-  "Sample" = "orig.ident",
-  "Cluster" = "seurat_clusters",
-  "Subcluster" = "subcluster"
-)
-
 # ===========================
 # Cell types and subclusters
 # ===========================

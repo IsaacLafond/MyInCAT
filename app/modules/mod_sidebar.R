@@ -1,8 +1,15 @@
 # -------------------------
-# Subset sidebar UI
+# Sidebar UI
 # -------------------------
-mod_subset_sidebar_ui <- function(id, tree_data) {
+mod_sidebar_ui <- function(id, all_choices) {
   ns <- NS(id)
+
+  picker_input_options <- list(
+    "live-search" = TRUE,
+    "container" = "body",
+    "dropup-auto" = FALSE,
+    "dropdown-align-right" = "auto"
+  )
 
   page_fluid(
 
@@ -12,17 +19,45 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
       selectInput(
         ns("group_by"),
         "Compare between:",
-        choices = names(groupby_choices)
+        choices = c(
+          "Sample" = "orig.ident",
+          "Cluster" = "seurat_clusters",
+          "Subcluster" = "subcluster"
+        )
       ),
 
-      treeInput(
-        inputId = ns("subset_tree"),
-        label = "Select Desired Elements:",
-        choices = create_tree(tree_data),
-        selected = tree_data$experiment,
-        # closeDepth = 4,
-        returnValue = "all"
-        # returnValue = c("text", "id", "all"),
+      hr(),
+      h6("Subset Data"),
+
+      pickerInput(
+        inputId = ns("subset_samples"),
+        label = "1. Sample:",
+        choices = all_choices$samples,
+        selected = all_choices$samples, # Start with all selected
+        multiple = TRUE,
+        options = picker_input_options
+      ),
+      pickerInput(
+        inputId = ns("subset_clusters"),
+        label = "2. Cluster:",
+        choices = all_choices$clusters,
+        selected = all_choices$clusters, # Start with all selected
+        multiple = TRUE,
+        options = picker_input_options
+      ),
+      pickerInput(
+        inputId = ns("subset_subclusters"),
+        label = "3. Subcluster:",
+        choices = all_choices$subclusters,
+        selected = all_choices$subclusters, # Start with all selected
+        multiple = TRUE,
+        options = picker_input_options
+      ),
+
+      actionButton(
+        inputId = ns("reset_subset"),
+        label = "Reset",
+        class = "w-100"
       )
     ),
 
@@ -63,22 +98,17 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
       )
     ),
 
+    hr(),
+
     actionButton(
       inputId = ns("apply"),
       label = "Apply Changes",
-      class = "btn_primary w-100 mb-3"
+      class = "btn-primary w-100 mb-3"
     )
 
     # accordion(
     #   accordion_panel(
     #     title = "Subset Options",
-
-        # pickerInput(
-        #   inputId = ns("experiments"),
-        #   label = "Experiments:",
-        #   choices = experiments,
-        #   selected = experiments,
-        #   options = pickerOptions(
 
         # div(id = ns("experiment_container"))
 
@@ -100,36 +130,123 @@ mod_subset_sidebar_ui <- function(id, tree_data) {
 
 
 # -------------------------
-# Subset sidebar server
+# Sidebar server
 # -------------------------
-mod_subset_sidebar_server <- function(id, current_tab, tree_map) {
+mod_sidebar_server <- function(
+  id,
+  current_tab,
+  all_choices,
+  map_sample_to_cluster,
+  map_sample_cluster_to_subcluster
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # output$current_tab <- reactive({ current_tab() })
-    # outputOptions(output, "current_tab", suspendWhenHidden = FALSE)
+    # 1. Update Clusters when Samples change
+    observeEvent(input$subset_samples, {
+      # O(1) Lookup: Pull valid clusters from the hash map list
+      if(is.null(input$subset_samples)) {
+        valid_clusters <- character(0)
+      } else {
+        # unlist extracts the values from the named list instantly
+        valid_clusters <- unique(unlist(map_sample_to_cluster[input$subset_samples], use.names = FALSE))
+      }
 
+      # Create a boolean vector for which choices should be disabled
+      disabled_flags <- !(all_choices$clusters %in% valid_clusters)
+      
+      # Retain previously selected clusters if they are still valid
+      current_selected <- isolate(input$subset_clusters)
+      new_selected <- intersect(current_selected, valid_clusters)
+      
+      # Failsafe: if intersection is empty, select all valid options
+      if(length(new_selected) == 0 && length(valid_clusters) > 0) new_selected <- valid_clusters
+
+      # Update the UI: keep choices static, but update the disabled states
+      updatePickerInput(
+        session = session,
+        inputId = "subset_clusters",
+        choices = all_choices$clusters,
+        selected = new_selected,
+        choicesOpt = list(disabled = disabled_flags)
+      )
+    }, ignoreNULL = FALSE)
+
+    # 2. Update Subclusters when Samples OR Clusters change
+    observeEvent(c(input$subset_samples, input$subset_clusters), {
+      
+      if(is.null(input$subset_samples) || is.null(input$subset_clusters)) {
+        valid_subs <- character(0)
+      } else {
+        # Create lookup keys using R's highly optimized `outer` function
+        # e.g., "SampleA||Cluster1", "SampleB||Cluster1"
+        valid_keys <- as.character(outer(input$subset_samples, input$subset_clusters, FUN = paste, sep = "||"))
+        
+        # O(1) Lookup: Pull valid subclusters from the hash map
+        valid_subs <- unique(unlist(map_sample_cluster_to_subcluster[valid_keys], use.names = FALSE))
+      }
+
+      # Create boolean vector for disabled options
+      disabled_flags <- !(all_choices$subclusters %in% valid_subs)
+      
+      current_selected <- isolate(input$subset_subclusters)
+      new_selected <- intersect(current_selected, valid_subs)
+      if(length(new_selected) == 0 && length(valid_subs) > 0) new_selected <- valid_subs
+
+      updatePickerInput(
+        session = session,
+        inputId = "subset_subclusters",
+        choices = all_choices$subclusters,
+        selected = new_selected,
+        choicesOpt = list(disabled = disabled_flags)
+      )
+    }, ignoreNULL = FALSE)
+
+    observeEvent(input$reset_subset, {
+      updatePickerInput(
+        session = session,
+        inputId = "subset_samples",
+        choices = all_choices$samples,
+        selected = all_choices$samples,
+      )
+      updatePickerInput(
+        session = session,
+        inputId = "subset_clusters",
+        choices = all_choices$clusters,
+        selected = all_choices$clusters,
+        choicesOpt = list(
+          disabled = rep(FALSE, length(all_choices$clusters))
+        )
+      )
+      updatePickerInput(
+        session = session,
+        inputId = "subset_subclusters",
+        choices = all_choices$subclusters,
+        selected = all_choices$subclusters,
+        choicesOpt = list(
+          disabled = rep(FALSE, length(all_choices$subclusters))
+        )
+      )
+    })
+
+    # Return values
     seurat_subset_params <- reactiveVal(NULL)
     seurat_group_by <- reactiveVal(NULL)
     cellchat_state <- reactiveVal(NULL)
 
     observeEvent(input$apply, {
-      req(
-        input$group_by,
-        input$subset_tree,
-        input$cellchat_sample,
-        input$cellchat_interaction_type
-      )
+      # Require all Seurat subset inputs OR cellchat inputs depending on the tab
+      if(current_tab() != "cellchat") {
+         req(input$group_by, input$subset_samples, input$subset_clusters, input$subset_subclusters)
+      } else {
+         req(input$cellchat_sample, input$cellchat_interaction_type)
+      }
 
       get_subset_only <- function() {
-        tree_raw <- input$subset_tree
-        selected_labels <- unique(sapply(tree_raw, function(x) x$text[[1]] ))
-
         list(
-          experiments = tree_map$experiment[tree_map$experiment %in% selected_labels],
-          orig.ident  = tree_map$orig.ident[tree_map$orig.ident %in% selected_labels],
-          seurat_clusters = tree_map$seurat_clusters[tree_map$seurat_clusters %in% selected_labels],
-          subcluster = tree_map$subcluster[tree_map$subcluster %in% selected_labels]
+          orig.ident  = input$subset_samples,
+          seurat_clusters = input$subset_clusters,
+          subcluster = input$subset_subclusters
         )
       }
 
@@ -140,20 +257,17 @@ mod_subset_sidebar_server <- function(id, current_tab, tree_map) {
         )
       }
 
-      if (input$apply ==0) {
-        # Initial load
+      if (input$apply == 0) {
         seurat_subset_params(get_subset_only())
         seurat_group_by(input$group_by)
         cellchat_state(get_cellchat_selections())
       } else if (current_tab() == "cellchat") {
-        # Only update CellChat state
         cellchat_state(get_cellchat_selections())
       } else {
-        # Update Seurat subset and group_by
         seurat_subset_params(get_subset_only())
         seurat_group_by(input$group_by)
       }
-    }, ignoreNULL = FALSE) # Load defaults on start
+    }, ignoreNULL = FALSE) 
 
     return(list(
       seurat_subset = seurat_subset_params,

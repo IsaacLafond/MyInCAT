@@ -109,10 +109,6 @@ mod_deg_server <- function(id, global_state) {
 
       # Update ident.1 and ident.2 choices based on current group_by levels
       idents <- list(
-        Experiments = setNames(
-          paste0("experiment::", state$experiment),
-          state$experiment
-        ),
         Samples = setNames(
           paste0("orig.ident::", state$orig.ident),
           state$orig.ident
