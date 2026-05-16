@@ -4,78 +4,173 @@
 mod_deg_kegg_ui <- function(id) {
   ns <- NS(id)
 
-  page_fluid(
-
-    h3("Up Terms"),
-
-    numericInput(
-      ns("kegg_up_pval_cutoff"),
-      label = "Up Terms Adjusted p-value Cutoff:",
-      value = 0.05,
-      min = 0,
-      max = 1,
-      step = 0.01
+  page_fillable(
+    radioGroupButtons(
+        inputId = ns("term_type"),
+        choices = c("Up", "Down"),
+        selected = "Up",
+        justified = TRUE
     ),
 
-    actionButton(
-      ns("run_kegg_up"),
-      label = "Find KEGG Up Terms",
-      class = "btn-primary",
-      icon = icon("play")
-    ),
+    card(
+      fill = TRUE,
+      full_screen = TRUE,
+      card_header(
+        class = "d-flex justify-content-between align-items-center",
+        conditionalPanel(
+          condition = "input.term_type == 'Up'",
+          ns = ns,
+          "Up Terms"
+        ),
+        conditionalPanel(
+          condition = "input.term_type == 'Down'",
+          ns = ns,
+          "Down Terms"
+        ),
 
-    dataTableOutput(
-      ns("kegg_table_up"),
-      width = "100%",
-      height = "450px"
-    ) %>% with_custom_spinner(),
+        div(
+          class = "d-flex gap-3",
+          popover(
+            trigger = actionButton(
+              ns("settings_trigger"),
+              label = NULL,
+              icon = icon("gear"),
+              class = "btn-light"
+            ),
+            placement = "auto",
+            # options = list(
+            #   trigger = "click focus"
+            # ),
+            # popover content:
+            conditionalPanel(
+              condition = "input.term_type == 'Up'",
+              ns = ns,
+              # content:
+              numericInput(
+                ns("kegg_up_pval_cutoff"),
+                label = "Up Terms Adjusted p-value Cutoff:",
+                value = 0.05,
+                min = 0,
+                max = 1,
+                step = 0.01
+              ),
+            ),
+            conditionalPanel(
+              condition = "input.term_type == 'Down'",
+              ns = ns,
+              # content:
+              numericInput(
+                ns("kegg_down_pval_cutoff"),
+                label = "Down Terms Adjusted p-value Cutoff:",
+                value = 0.05,
+                min = 0,
+                max = 1,
+                step = 0.01
+              ),
+            )
+          ),
 
-    uiOutput(
-      ns("kegg_plot_up_ui")
-    ),
+          radioGroupButtons(
+            inputId = ns("output_type"),
+            choiceNames = list(icon("table"), icon("chart-line")),
+            choiceValues = c("table", "plot"),
+            selected = "table"
+          ),
 
-    plotOutput(
-      ns("kegg_plot_up"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner(),
+          conditionalPanel(
+            condition = "input.term_type == 'Up'",
+            ns = ns,
+            actionButton(
+              ns("run_kegg_up"),
+              label = "Find KEGG Up Terms",
+              class = "btn-primary",
+              icon = icon("play")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.term_type == 'Down'",
+            ns = ns,
+            actionButton(
+              ns("run_kegg_down"),
+              label = "Find KEGG Down Terms",
+              class = "btn-primary",
+              icon = icon("play")
+            )
+          ),
+        )
+        # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+      ),
+      card_body(
+        conditionalPanel(
+          condition = "input.term_type == 'Up'",
+          ns = ns,
+          conditionalPanel(
+            condition = "input.output_type == 'table'",
+            ns = ns,
+            div(
+              class = "h-100",
+              # content
+              dataTableOutput(
+                ns("kegg_table_up")
+              ) %>% with_custom_spinner()
+            )
+          ),
+          conditionalPanel(
+            condition = "input.output_type == 'plot'",
+            ns = ns,
+            div(
+              class = "h-100",
+              style = "aspect-ratio: 4 / 3; min-width: 500px;",
+              # content
+              uiOutput(
+                ns("kegg_plot_up_ui")
+              ),
 
-    # =========================
+              plotOutput(
+                ns("kegg_plot_up"),
+                width = "100%",
+                height = "100%",
+                fill = TRUE
+              ) %>% with_custom_spinner()
+            )
+          )
+        ),
+        conditionalPanel(
+          condition = "input.term_type == 'Down'",
+          ns = ns,
+          conditionalPanel(
+            condition = "input.output_type == 'table'",
+            ns = ns,
+            div(
+              class = "h-100",
+              # content
+              dataTableOutput(
+                ns("kegg_table_down")
+              ) %>% with_custom_spinner()
+            )
+          ),
+          conditionalPanel(
+            condition = "input.output_type == 'plot'",
+            ns = ns,
+            div(
+              class = "h-100",
+              style = "aspect-ratio: 4 / 3; min-width: 500px;",
+              # content
+              uiOutput(
+                ns("kegg_plot_down_ui")
+              ),
 
-    h3("Down Terms"),
-
-    numericInput(
-      ns("kegg_down_pval_cutoff"),
-      label = "Down Terms Adjusted p-value Cutoff::",
-      value = 0.05,
-      min = 0,
-      max = 1,
-      step = 0.01
-    ),
-
-    actionButton(
-      ns("run_kegg_down"),
-      label = "Find KEGG Down Terms",
-      class = "btn-primary",
-      icon = icon("play")
-    ),
-
-    dataTableOutput(
-      ns("kegg_table_down"),
-      width = "100%",
-      height = "450px"
-    ) %>% with_custom_spinner(),
-
-    uiOutput(
-      ns("kegg_plot_down_ui")
-    ),
-
-    plotOutput(
-      ns("kegg_plot_down"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner()
-
+              plotOutput(
+                ns("kegg_plot_down"),
+                width = "100%",
+                height = "100%",
+                fill = TRUE
+              ) %>% with_custom_spinner()
+            )
+          )
+        )
+      )
+    )
   )
 }
 
@@ -158,27 +253,15 @@ mod_deg_kegg_server <- function(id, DEGs) {
     })
 
     output$kegg_table_up <- renderDataTable(
-      width = "100%",
-      options = list(
-        paging = FALSE,
-        scrollX = TRUE,
-        scrollY = "300px",
-        scrollCollapse = TRUE
-      ),
       rownames = FALSE,
+      options = datatable_options,
       # content:
       { kegg_results_up()@result }
       )
 
     output$kegg_table_down <- renderDataTable(
-      width = "100%",
-      options = list(
-        paging = FALSE,
-        scrollX = TRUE,
-        scrollY = "300px",
-        scrollCollapse = TRUE
-      ),
       rownames = FALSE,
+      options = datatable_options,
       # content:
       { kegg_results_down()@result }
     )

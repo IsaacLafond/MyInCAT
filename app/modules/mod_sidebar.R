@@ -4,13 +4,6 @@
 mod_sidebar_ui <- function(id, all_choices) {
   ns <- NS(id)
 
-  picker_input_options <- list(
-    "live-search" = TRUE,
-    "container" = "body",
-    "dropup-auto" = FALSE,
-    "dropdown-align-right" = "auto"
-  )
-
   page_fluid(
 
     conditionalPanel(

@@ -5,7 +5,7 @@ library(bslib)
 library(shinyWidgets)
 library(shinycssloaders)
 library(colourpicker)
-library(DT)
+# library(DT)
 # Analysis
 library(Seurat)
 library(BPCells)
@@ -17,6 +17,7 @@ library(ggplot2)
 library(dplyr)
 
 # Utils
+source("utils/shared_options.R")
 source("utils/umap_code.R")
 source("utils/deg_code.R")
 source("utils/choices.R")
@@ -40,6 +41,7 @@ source("modules/mod_cellchat_plots.R")
 
 # UI components
 source("ui/home_ui.R")
+source("ui/output_card.R")
 source("ui/custom_spinner.R")
 source("ui/coming_soon.R")
 source("ui/color_picker.R")
@@ -75,67 +77,66 @@ map_sample_cluster_to_subcluster <- split(distinct_meta$subcluster, distinct_met
 rna_features <- Features(sc_combined)
 
 
-ui <- page_fillable(
+ui <- page_navbar(
+  id = "main_navbar",
+  window_title = "MyInCAT",
+  fillable = TRUE,
   theme = bs_theme(
     version = 5,
     # preset = "minty"
   ),
 
-  page_navbar(
-    id = "main_navbar",
-    window_title = "MyInCAT",
+  # Head with custom CSS and favicon
+  header = tags$head(
+    tags$link(rel = "icon", type = "image/png", href = "www/logo.png"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
+  ),
 
-    # Head with custom CSS and favicon
-    header = tags$head(
-      tags$link(rel = "icon", type = "image/png", href = "www/logo.png"),
-      tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
-    ),
+  # Navbar title as logo link to home
+  title = tags$a(
+    href = "/",
+    tags$img(src = "www/logo.png", height = "30px")
+  ),
 
-    # Navbar title as logo link to home
-    title = tags$a(
-      href = "/",
-      tags$img(src = "www/logo.png", height = "30px")
-    ),
+  sidebar = sidebar(
+    title = "Options",
+    position = "right",
+    width = 300,
+    fillable = TRUE,
+    fill = TRUE,
+    # content:
+    mod_sidebar_ui("sidebar", all_choices)
+  ),
 
-    sidebar = sidebar(
-      title = "Options",
-      position = "right",
-      width = 300,
-      fillable = TRUE,
-      fill = TRUE,
-      # content:
-      mod_sidebar_ui("sidebar", all_choices)
-    ),
+  # Home tab
+  nav_panel(
+    title = "Home",
+    value = "home",
+    home_ui()
+  ),
 
-    # Home tab
-    nav_panel(
-      title = "Home",
-      value = "home",
-      home_ui()
-    ),
+  # UMAP tab
+  nav_panel(
+    title = "UMAP",
+    value = "umap",
+    mod_umap_ui("umap")
+  ),
 
-    # UMAP tab
-    nav_panel(
-      title = "UMAP",
-      value = "umap",
-      mod_umap_ui("umap")
-    ),
+  # DEGs tab
+  nav_panel(
+    title = "DEGs",
+    value = "deg",
+    mod_deg_tab_ui("deg_tab", rna_features)
+  ),
 
-    # DEGs tab
-    nav_panel(
-      title = "DEGs",
-      value = "deg",
-      mod_deg_tab_ui("deg_tab", rna_features)
-    ),
-
-    # CellChat tab
-    nav_panel(
-      title = "CellChat",
-      value = "cellchat",
-      mod_cellchat_tab_ui("cellchat_tab")
-    )
+  # CellChat tab
+  nav_panel(
+    title = "CellChat",
+    value = "cellchat",
+    mod_cellchat_tab_ui("cellchat_tab")
   )
 )
+
 
 server <- function(input, output, session) {
   current_tab <- reactive(input$main_navbar)

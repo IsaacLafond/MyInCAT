@@ -4,95 +4,114 @@
 mod_deg_ui <- function(id) {
     ns <- NS(id)
 
-    page_fluid(
+    degs_settings_popover <- popover(
+      trigger = actionButton(
+        ns("settings_trigger"),
+        label = NULL,
+        icon = icon("gear"),
+        class = "btn-light"
+      ),
+      placement = "auto",
+      # options = list(
+      #   trigger = "click focus"
+      # ),
+      # popover content:
       fluidRow(
-        column(
-          width = 6,
-          class = "d-flex justify-content-center",
-          selectizeInput(
-            ns("ident_1"),
-            label = "Comparison Groups (ident.1):",
-            choices = NULL,
-            multiple = TRUE
-          )
+        selectizeInput(
+          ns("ident_1"),
+          label = "Comparison Groups (ident.1):",
+          choices = NULL,
+          multiple = TRUE,
+          width = 250
         ),
-        column(
-          width = 6,
-          class = "d-flex justify-content-center",
-          selectizeInput(
-            ns("ident_2"),
-            label = "Reference Groups (ident.2):",
-            choices = NULL,
-            multiple = TRUE
-          )
+        selectizeInput(
+          ns("ident_2"),
+          label = "Reference Groups (ident.2):",
+          choices = NULL,
+          multiple = TRUE,
+          width = 250
         ),
-        column(
-          width = 6,
-          class = "d-flex justify-content-center",
-          numericInput(
-            ns("pval_cutoff"),
-            label = "Adjusted p-value Cutoff:",
-            value = 0.05,
-            min = 0,
-            max = 1,
-            step = 0.01
-          )
+        numericInput(
+          ns("pval_cutoff"),
+          label = "Adjusted p-value Cutoff:",
+          width = 250,
+          value = 0.05,
+          min = 0,
+          max = 1,
+          step = 0.01
         ),
-        column(
-          width = 6,
-          class = "d-flex justify-content-evenly",
-          numericInput(
-            ns("lower_logfc_cutoff"),
-            label = "Lower avg_log2FC Cutoff:",
-            value = -0.2,
-            step = 0.1,
-            width = "33%"
-          ),
-          numericInput(
-            ns("upper_logfc_cutoff"),
-            label = "Upper avg_log2FC Cutoff:",
-            value = 0.2,
-            step = 0.1,
-            width = "33%"
-          )
+        numericInput(
+          ns("lower_logfc_cutoff"),
+          label = "Lower avg_log2FC Cutoff:",
+          value = -0.2,
+          step = 0.1,
+          width = "50%"
+        ),
+        numericInput(
+          ns("upper_logfc_cutoff"),
+          label = "Upper avg_log2FC Cutoff:",
+          value = 0.2,
+          step = 0.1,
+          width = "50%"
         )
-      ),
-
-      column(
-        width = 12,
-        class = "d-flex justify-content-center",
-        actionButton(
-          ns("run_deg"),
-          label = "Find DEGs",
-          class = "btn-primary",
-          icon = icon("play")
-        )
-      ),
-
-      # Output: DEG results table
-      dataTableOutput(
-        ns("deg_table"),
-        height = "450px"
-      ) %>% with_custom_spinner(),
-
-      hr(),
-
-      accordion(
-        id = ns("meta_accordion"),
-        accordion_panel(
-          title = "Included Data Meta Table",
-          # Output: Metadata table
-          dataTableOutput(ns("meta_table")) %>% with_custom_spinner()
-        ),
-        accordion_panel(
-          title = "Relevant Code",
-          code_block(deg_code)
-        ),
-        open = FALSE,
-        class = "mb-5"
       )
-
     )
+
+    card(
+      fill = TRUE,
+      full_screen = TRUE,
+      card_header(
+        class = "d-flex justify-content-between align-items-center",
+
+        "Differentially Expressed Genes",
+
+        div(
+          class = "d-flex gap-3",
+          # content:
+          degs_settings_popover,
+
+          actionButton(
+            ns("run_deg"),
+            label = "Find DEGs",
+            class = "btn-primary",
+            icon = icon("play")
+          )
+        )
+
+        # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+      ),
+      card_body(
+        div(
+          class = "d-flex h-100 justify-content-center align-items-center",
+          # content
+          dataTableOutput(
+            ns("deg_table")
+          ) %>% with_custom_spinner(),
+        )
+      ),
+      card_footer(
+        layout_columns(
+          col_widths = c(6, 6),
+          class = "m-0",
+          actionButton(
+            ns("show_metadata"),
+            label = "View Cell Composition Summary",
+            class = "btn btn-primary"
+          ),
+          actionButton(
+            ns("show_code"),
+            label = "View Source Code",
+            class = "btn btn-primary"
+          )
+        )
+      )
+    )
+
+    #   # Output: DEG results table
+    #   dataTableOutput(
+    #     ns("deg_table"),
+    #     height = "450px"
+    #   ) %>% with_custom_spinner(),
 }
 
 
@@ -205,21 +224,15 @@ mod_deg_server <- function(id, global_state) {
 
     # 3. Render the output table
     output$deg_table <- renderDataTable(
-      width = "100%",
-      options = list(
-        paging = FALSE,
-        scrollX = TRUE,
-        scrollY = "300px",
-        scrollCollapse = TRUE
-      ),
       rownames = TRUE,
+      options = datatable_options,
       {
         deg_results()
     })
 
     # Populate placeholder metadata table
     output$meta_table <- renderDataTable(
-      width = "100%",
+      options = datatable_options,
       # content:
       {
         req(global_state())
@@ -238,6 +251,28 @@ mod_deg_server <- function(id, global_state) {
           # ?????????????????
       }
     )
+
+    # Modals
+    observeEvent(input$show_metadata, {
+      showModal(modalDialog(
+        title = "Cell Composition Summary",
+        size = "xl",
+        dataTableOutput(
+          session$ns("meta_table"),
+          height = "100%"
+        ) %>% with_custom_spinner(),
+        easyClose = TRUE
+      ))
+    })
+
+    observeEvent(input$show_code, {
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(deg_code),
+        easyClose = TRUE
+      ))
+    })
 
     DEGs <- reactive({
       req(deg_results())

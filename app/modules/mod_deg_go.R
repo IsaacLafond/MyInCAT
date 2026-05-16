@@ -4,60 +4,134 @@
 mod_deg_go_ui <- function(id) {
   ns <- NS(id)
 
-  page_fluid(
-
-    h3("Up Terms"),
-
-    actionButton(
-      ns("run_go_up"),
-      label = "Find GO Up Terms",
-      class = "btn-primary",
-      icon = icon("play")
+  page_fillable(
+    radioGroupButtons(
+        inputId = ns("term_type"),
+        choices = c("Up", "Down"),
+        selected = "Up",
+        justified = TRUE
     ),
 
-    dataTableOutput(
-      ns("go_table_up"),
-      width = "100%",
-      height = "450px"
-    ) %>% with_custom_spinner(),
+    card(
+      fill = TRUE,
+      full_screen = TRUE,
+      card_header(
+        class = "d-flex justify-content-between align-items-center",
+        conditionalPanel(
+          condition = "input.term_type == 'Up'",
+          ns = ns,
+          "Up Terms"
+        ),
+        conditionalPanel(
+          condition = "input.term_type == 'Down'",
+          ns = ns,
+          "Down Terms"
+        ),
 
-    uiOutput(
-      ns("go_plot_up_ui")
-    ),
+        div(
+          class = "d-flex gap-3",
 
-    plotOutput(
-      ns("go_plot_up"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner(),
+          radioGroupButtons(
+            inputId = ns("output_type"),
+            choiceNames = list(icon("table"), icon("chart-line")),
+            choiceValues = c("table", "plot"),
+            selected = "table"
+          ),
 
-    # =========================
+          conditionalPanel(
+            condition = "input.term_type == 'Up'",
+            ns = ns,
+            actionButton(
+              ns("run_go_up"),
+              label = "Find GO Up Terms",
+              class = "btn-primary",
+              icon = icon("play")
+            )
+          ),
+          conditionalPanel(
+            condition = "input.term_type == 'Down'",
+            ns = ns,
+            actionButton(
+              ns("run_go_down"),
+              label = "Find GO Down Terms",
+              class = "btn-primary",
+              icon = icon("play")
+            )
+          ),
+        )
+        # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+      ),
+      card_body(
+        conditionalPanel(
+          condition = "input.term_type == 'Up'",
+          ns = ns,
+          conditionalPanel(
+            condition = "input.output_type == 'table'",
+            ns = ns,
+            div(
+              class = "h-100",
+              # content
+              dataTableOutput(
+                ns("go_table_up")
+              ) %>% with_custom_spinner()
+            )
+          ),
+          conditionalPanel(
+            condition = "input.output_type == 'plot'",
+            ns = ns,
+            div(
+              class = "h-100",
+              style = "aspect-ratio: 4 / 3; min-width: 500px;",
+              # content
+              uiOutput(
+                ns("go_plot_up_ui")
+              ),
 
-    h3("Down Terms"),
+              plotOutput(
+                ns("go_plot_up"),
+                width = "100%",
+                height = "100%",
+                fill = TRUE
+              ) %>% with_custom_spinner()
+            )
+          )
+        ),
+        conditionalPanel(
+          condition = "input.term_type == 'Down'",
+          ns = ns,
+          conditionalPanel(
+            condition = "input.output_type == 'table'",
+            ns = ns,
+            div(
+              class = "h-100",
+              # content
+              dataTableOutput(
+                ns("go_table_down")
+              ) %>% with_custom_spinner()
+            )
+          ),
+          conditionalPanel(
+            condition = "input.output_type == 'plot'",
+            ns = ns,
+            div(
+              class = "h-100",
+              style = "aspect-ratio: 4 / 3; min-width: 500px;",
+              # content
+              uiOutput(
+                ns("go_plot_down_ui")
+              ),
 
-    actionButton(
-      ns("run_go_down"),
-      label = "Find GO Down Terms",
-      class = "btn-primary",
-      icon = icon("play")
-    ),
-
-    dataTableOutput(
-      ns("go_table_down"),
-      width = "100%",
-      height = "450px"
-    ) %>% with_custom_spinner(),
-
-    uiOutput(
-      ns("go_plot_down_ui")
-    ),
-
-    plotOutput(
-      ns("go_plot_down"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner()
-
+              plotOutput(
+                ns("go_plot_down"),
+                width = "100%",
+                height = "100%",
+                fill = TRUE
+              ) %>% with_custom_spinner()
+            )
+          )
+        )
+      )
+    )
   )
 }
 
@@ -108,27 +182,15 @@ mod_deg_go_server <- function(id, DEGs) {
     })
 
     output$go_table_up <- renderDataTable(
-      width = "100%",
-      options = list(
-        paging = FALSE,
-        scrollX = TRUE,
-        scrollY = "300px",
-        scrollCollapse = TRUE
-      ),
       rownames = FALSE,
+      options = datatable_options,
       # content:
       { go_results_up()@result }
       )
 
     output$go_table_down <- renderDataTable(
-      width = "100%",
-      options = list(
-        paging = FALSE,
-        scrollX = TRUE,
-        scrollY = "300px",
-        scrollCollapse = TRUE
-      ),
       rownames = FALSE,
+      options = datatable_options,
       # content:
       { go_results_down()@result }
     )

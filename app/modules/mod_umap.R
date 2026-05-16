@@ -3,34 +3,46 @@
 # -------------------------
 mod_umap_ui <- function(id) {
   ns <- NS(id)
-
-  page_fluid(
-
-    verbatimTextOutput(ns("output")),
-
-    # Output: UMAP
-    plotOutput(
-      ns("umap_plot"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner(),
-
-    # Relevant code
-    accordion(
-      id = ns("meta_accordion"),
-      accordion_panel(
-        title = "Meta Table",
-        # Output: Metadata table
-        dataTableOutput(ns("meta_table")) %>% with_custom_spinner()
-      ),
-      accordion_panel(
-        title = "Relevant Code",
-        code_block(umap_code)
-      ),
-      open = FALSE,
-      class = "mb-5"
+  
+  card(
+    fill = TRUE,
+    full_screen = TRUE,
+    card_header(
+      class = "d-flex justify-content-between align-items-center",
+      "UMAP Plot",
+      # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+    ),
+    card_body(
+      div(
+        class = "h-100",
+        style = "aspect-ratio: 4 / 3; min-width: 500px;",
+        # content
+        plotOutput(
+          ns("umap_plot"),
+          width = "100%",
+          height = "100%",
+          fill = TRUE
+        ) %>% with_custom_spinner()
+      )
+    ),
+    card_footer(
+      layout_columns(
+        col_widths = c(6, 6),
+        class = "m-0",
+        actionButton(
+          ns("show_metadata"),
+          label = "View Cell Composition Summary",
+          class = "btn btn-primary"
+        ),
+        actionButton(
+          ns("show_code"),
+          label = "View Source Code",
+          class = "btn btn-primary"
+        )
+      )
     )
   )
+
 }
 
 
@@ -39,9 +51,6 @@ mod_umap_ui <- function(id) {
 # -------------------------
 mod_umap_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
-    # output$output <- renderPrint({
-    #   str(sidebar_selections())
-    # })
 
     # Populate placeholder UMAP plot
     output$umap_plot <- renderPlot({
@@ -67,7 +76,7 @@ mod_umap_server <- function(id, global_state) {
 
     # Populate placeholder metadata table
     output$meta_table <- renderDataTable(
-      width = "100%",
+      options = datatable_options,
       # content:
       {
         req(global_state())
@@ -86,6 +95,28 @@ mod_umap_server <- function(id, global_state) {
           # ?????????????????
       }
     )
+
+    # Modals
+    observeEvent(input$show_metadata, {
+      showModal(modalDialog(
+        title = "Cell Composition Summary",
+        size = "xl",
+        dataTableOutput(
+          session$ns("meta_table"),
+          height = "100%"
+        ) %>% with_custom_spinner(),
+        easyClose = TRUE
+      ))
+    })
+
+    observeEvent(input$show_code, {
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(umap_code),
+        easyClose = TRUE
+      ))
+    })
 
   })
 }

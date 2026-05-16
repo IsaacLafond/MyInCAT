@@ -1,8 +1,37 @@
-code {
-    overflow: scroll;
+.colourpicker-panel {
+  right: 0 !important;
+  left: auto !important;
 }
 
-.colourpicker-panel {
-    right: 0 !important;
-    left: auto !important;
+.shiny-spinner-output-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.modal {
+  z-index: 9999 !important;
+}
+.modal-dialog.modal-xl {
+  height: 90vh !important;
+  max-height: none !important;
+  width: 90vw !important;
+  max-width: none !important;
+  margin: 5vh auto !important;
+}
+
+/* Force the content wrapper to fill the new 90vh height */
+.modal-dialog.modal-xl .modal-content {
+  height: 100%; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Keeps the rounded corners clean */
+}
+
+/* Header and Footer will naturally keep their size (flex-shrink: 0 is default in Bootstrap) */
+
+/* Force the body to take the remaining space and scroll */
+.modal-dialog.modal-xl .modal-body {
+  flex: 1 1 auto;    /* Grow to fill empty space */
+  overflow-y: auto;  /* Enable vertical scrolling */
+  min-height: 0;     /* CRITICAL: Allows flexbox to shrink the container and trigger the scrollbar */
 }

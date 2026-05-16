@@ -4,26 +4,55 @@
 mod_dot_plot_ui <- function(id, feature_choices) {
   ns <- NS(id)
 
-  page_fluid(
+  card(
+    fill = TRUE,
+    full_screen = TRUE,
+    card_header(
+      class = "d-flex justify-content-between align-items-center",
+      "Dot Plot",
 
-    virtualSelectInput(
-      inputId = ns("dot_features"),
-      label = "Select features:",
-      choices = feature_choices,
-      multiple = TRUE,
-      search = TRUE,
-      showSelectedOptionsFirst = TRUE,
-      disableSelectAll = TRUE,
-      inline = FALSE,
-      width = NULL
+      virtualSelectInput(
+        inputId = ns("dot_features"),
+        label = NULL,
+        placeholder = "Select features...",
+        choices = feature_choices,
+        multiple = TRUE,
+        search = TRUE,
+        showSelectedOptionsFirst = TRUE,
+        disableSelectAll = TRUE,
+        width = "250px"
+      ),
+      # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
     ),
-
-    plotOutput(
-      ns("dot_plot"),
-      width = "100%",
-      height = "66vh"
-    ) %>% with_custom_spinner()
-
+    card_body(
+      div(
+        class = "h-100",
+        style = "aspect-ratio: 4 / 3; min-width: 500px;",
+        # content
+        plotOutput(
+          ns("dot_plot"),
+          width = "100%",
+          height = "100%",
+          fill = TRUE
+        ) %>% with_custom_spinner()
+      )
+    ),
+    # card_footer( # ===== KEEP FOOTER FOR AVGEXPRESSION =====
+    #   layout_columns(
+    #     col_widths = c(6, 6),
+    #     class = "m-0",
+    #     actionButton(
+    #       ns("show_metadata"),
+    #       label = "View Cell Composition Summary",
+    #       class = "btn btn-primary"
+    #     ),
+    #     actionButton(
+    #       ns("show_code"),
+    #       label = "View Source Code",
+    #       class = "btn btn-primary"
+    #     )
+    #   )
+    # )
   )
 }
 
