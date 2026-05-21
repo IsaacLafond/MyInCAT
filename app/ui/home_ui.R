@@ -9,11 +9,11 @@ home_ui <- function() {
     br(),
 
     p(
-      "MyInCAT (Myogenic single-cell Integration of Cachexia Transcriptomics data), is a resource for exploring single-cell RNA-sequencing data in cancer cachexia! We have integrated single-cell and single-nucleus RNA sequencing data containing 130,996 cells from 6 studies, 5 tumour models to perform differential gene expression, pathway, and cell communication analyses on skeletal muscle from mouse models of cancer cachexia. Use this resource to generate hypotheses, validate findings, and generate publication-ready plots.",
+      "MyInCAT (Myogenic single-cell Integration of Cachexia Transcriptomics data), is a resource designed for exploring single-cell RNA-sequencing data in cancer cachexia! We have integrated single-cell and single-nucleus RNA sequencing data from skeletal muscle, containing 130,996 cells from 6 studies and 5 tumour models to perform differential gene expression, pathway, and cell communication analyses. Use this resource to generate hypotheses, validate findings, and generate publication-ready plots.",
       style = ""
     ),
 
-    p("For a tutorial on how to use CachexiaSC, please watch this video!"),
+    p("For a tutorial on how to use MyInCAT, please watch this video!"),
 
     # tags$iframe(
     #   src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
@@ -30,6 +30,19 @@ home_ui <- function() {
       width = "66%",
       style = "aspect-ratio: 16/9;",
       class = "mx-auto d-block"
+    ),
+
+    p(
+      "To download the integrated mouse skeletal muscle and tumour Seurat objects, and the integrated and split CellChat objects, please visit: (will be published on Zenodo once the manuscript is published)"
+    ),
+    p(
+      "Codes can be accessed on GitHub (",
+      a(
+        "https://github.com/musclesci/MyInCAT",
+        href = "https://github.com/musclesci/MyInCAT",
+        target = "_blank"
+      ),
+      ")."
     ),
 
     hr(),

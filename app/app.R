@@ -5,7 +5,7 @@ library(bslib)
 library(shinyWidgets)
 library(shinycssloaders)
 library(colourpicker)
-# library(DT)
+library(DT)
 # Analysis
 library(Seurat)
 library(BPCells)
