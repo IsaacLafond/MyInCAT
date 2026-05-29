@@ -43,7 +43,7 @@ mod_deg_go_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_go_up"),
-              label = "Find GO Up Terms",
+              label = "Find Up GO Terms",
               class = "btn-primary",
               icon = icon("play")
             )
@@ -53,7 +53,7 @@ mod_deg_go_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_go_down"),
-              label = "Find GO Down Terms",
+              label = "Find Down GO Terms",
               class = "btn-primary",
               icon = icon("play")
             )
@@ -224,6 +224,8 @@ mod_deg_go_server <- function(id, DEGs) {
                 search = TRUE,
                 disableSelectAll = TRUE,
                 inline = FALSE,
+                optionsCount = 7,
+                position = "bottom"
               )
             ),
             column(
@@ -280,6 +282,8 @@ mod_deg_go_server <- function(id, DEGs) {
                 search = TRUE,
                 disableSelectAll = TRUE,
                 inline = FALSE,
+                optionsCount = 7,
+                position = "bottom"
               )
             ),
             column(

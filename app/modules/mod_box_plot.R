@@ -14,7 +14,9 @@ mod_box_plot_ui <- function(id, feature_choices) {
       virtualSelectInput(
         inputId = ns("box_features"),
         label = NULL,
+        placeholder = "Select feature...",
         choices = feature_choices,
+        search = TRUE,
         width = "250px"
       ),
       # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")

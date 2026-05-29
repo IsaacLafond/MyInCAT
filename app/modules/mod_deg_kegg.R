@@ -82,7 +82,7 @@ mod_deg_kegg_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_kegg_up"),
-              label = "Find KEGG Up Terms",
+              label = "Find Up KEGG Terms",
               class = "btn-primary",
               icon = icon("play")
             )
@@ -92,7 +92,7 @@ mod_deg_kegg_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_kegg_down"),
-              label = "Find KEGG Down Terms",
+              label = "Find Down KEGG Terms",
               class = "btn-primary",
               icon = icon("play")
             )
@@ -295,6 +295,8 @@ mod_deg_kegg_server <- function(id, DEGs) {
                 search = TRUE,
                 disableSelectAll = TRUE,
                 inline = FALSE,
+                optionsCount = 7,
+                position = "bottom"
               )
             ),
             column(
@@ -351,6 +353,8 @@ mod_deg_kegg_server <- function(id, DEGs) {
                 search = TRUE,
                 disableSelectAll = TRUE,
                 inline = FALSE,
+                optionsCount = 7,
+                position = "bottom"
               )
             ),
             column(
