@@ -17,19 +17,27 @@ mod_deg_ui <- function(id) {
       # ),
       # popover content:
       fluidRow(
-        selectizeInput(
+        pickerInput(
           ns("ident_1"),
           label = "Comparison Groups (ident.1):",
           choices = NULL,
           multiple = TRUE,
-          width = 250
+          width = 250,
+          options = list(
+            "actions-box" = TRUE,
+            "live-search" = TRUE
+          )
         ),
-        selectizeInput(
+        pickerInput(
           ns("ident_2"),
           label = "Reference Groups (ident.2):",
           choices = NULL,
           multiple = TRUE,
-          width = 250
+          width = 250,
+          options = list(
+            "actions-box" = TRUE,
+            "live-search" = TRUE
+          )
         ),
         numericInput(
           ns("pval_cutoff"),
@@ -127,27 +135,14 @@ mod_deg_server <- function(id, global_state) {
       state <- global_state()
 
       # Update ident.1 and ident.2 choices based on current group_by levels
-      idents <- list(
-        Samples = setNames(
-          paste0("orig.ident::", state$orig.ident),
-          state$orig.ident
-        ),
-        Clusters = setNames(
-          paste0("seurat_clusters::", state$seurat_clusters),
-          state$seurat_clusters
-        ),
-        Subclusters = setNames(
-          paste0("subcluster::", state$subcluster),
-          state$subcluster
-        )
-      )
+      idents <- state[[state$group_by]]
 
-      updateSelectizeInput(
+      updatePickerInput(
         session,
         "ident_1",
         choices = idents
       )
-      updateSelectizeInput(
+      updatePickerInput(
         session,
         "ident_2",
         choices = idents
@@ -163,6 +158,7 @@ mod_deg_server <- function(id, global_state) {
       validate(
         need(length(input$ident_1) > 0, "Please select at least one group for Comparison (ident.1)."),
         need(length(input$ident_2) > 0, "Please select at least one group for Reference (ident.2)."),
+        need(input$ident_1 != input$ident_2, "Comparison and Reference groups cannot be the same."),
         need(input$pval_cutoff >= 0 && input$pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1."),
         need(input$lower_logfc_cutoff < input$upper_logfc_cutoff, "Please ensure the lower logFC cutoff is less than the upper logFC cutoff.")
       )
