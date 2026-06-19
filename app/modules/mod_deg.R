@@ -170,10 +170,8 @@ mod_deg_server <- function(id, global_state) {
       # Get the current subsetted object
       state <- global_state()
 
-      # strip prefixes from idents and remove dupes
-      strip_prefix <- function(x) sub("^[^:]+::", "", x)
-      ident_1_vals <- unique(strip_prefix(input$ident_1))
-      ident_2_vals <- unique(strip_prefix(input$ident_2))
+      ident_1_vals <- unique(input$ident_1)
+      ident_2_vals <- unique(input$ident_2)
       
       ## EXAMPLE -
       # If we wanted to get DEGs for satellite cells in LLC and C26 models compared to controls.

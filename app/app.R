@@ -196,9 +196,17 @@ server <- function(input, output, session) {
     req(sidebar_data$cellchat())
     selected_options <- sidebar_data$cellchat()
     
+    print("Selected CellChat options:")
+    print(selected_options)
     # Get path of the object based on inputs
-    obj_name <- paste("cellchat", selected_options$sample, selected_options$interaction_type, sep = "_")
-    path <- paste0("data/cellchat/", obj_name, ".rds")
+    if (selected_options$type == "Split") {
+      obj_name <- paste("split/cellchat", selected_options$split_sample, selected_options$interaction_type, sep = "_")
+    } else {
+      obj_name <- paste("integrated/cellchat", selected_options$combined_sample, selected_options$interaction_type, sep = "_")
+    }
+    path <- paste0("data/new_cellchat/", obj_name, ".rds")
+    # obj_name <- paste("cellchat", selected_options$sample, selected_options$interaction_type, sep = "_")
+    # path <- paste0("data/cellchat/", obj_name, ".rds")
     cellchat_object <- readRDS(path)
 
     # print(str(cellchat_object))

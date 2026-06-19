@@ -58,23 +58,44 @@ mod_sidebar_ui <- function(id, all_choices) {
       condition = "input.main_navbar == 'cellchat'",
       # content:
       selectInput(
-        ns("cellchat_sample"),
-        label = "Select sample:",
+        ns("cellchat_type"),
+        label = "Select analysis type:",
         choices = c(
-          "Agca_snLLC_CTL",
-          "Agca_snLLC_LLC",
-          "Brown_scLLC_CTL",
-          "Brown_scLLC_2w",
-          "Brown_scLLC_2.5w",
-          "Brown_scLLC_3.5w",
-          "Kim_scB16F10_CTL",
-          "Kim_scB16F10_B16F10",
-          "Pryce_scC26_CTL",
-          "Pryce_scC26_C26",
-          "Pryce_scKPP_CTL",
-          "Pryce_scKPP_KPP",
-          "Zhang_snKIC_CTL",
-          "Zhang_snKIC_KIC"
+          "Split",
+          "Combined"
+        )
+      ),
+
+      conditionalPanel(
+        condition = "input.cellchat_type == 'Split'",
+        ns = ns,
+        # content:
+        selectInput(
+          ns("cellchat_split_sample"),
+          label = "Select sample:",
+          choices = c(
+            "LLC_ctl",
+            "LLC_end",
+            "B16_ctl",
+            "B16_end",
+            "C26_ctl",
+            "C26_end",
+            "KPP_KIC_ctl",
+            "KPP_KIC_end"
+          )
+        )
+      ),
+      conditionalPanel(
+        condition = "input.cellchat_type == 'Combined'",
+        ns = ns,
+        # content:
+        selectInput(
+          ns("cellchat_combined_sample"),
+          label = "Select sample:",
+          choices = c(
+            "Control" = "ctl",
+            "Tumour Bearing" = "tb"
+          )
         )
       ),
 
@@ -232,7 +253,7 @@ mod_sidebar_server <- function(
       if(current_tab() != "cellchat") {
          req(input$group_by, input$subset_samples, input$subset_clusters, input$subset_subclusters)
       } else {
-         req(input$cellchat_sample, input$cellchat_interaction_type)
+         req(input$cellchat_type, input$cellchat_split_sample, input$cellchat_combined_sample, input$cellchat_interaction_type)
       }
 
       get_subset_only <- function() {
@@ -245,7 +266,9 @@ mod_sidebar_server <- function(
 
       get_cellchat_selections <- function() {
         list(
-          sample = input$cellchat_sample,
+          type = input$cellchat_type,
+          split_sample = input$cellchat_split_sample,
+          combined_sample = input$cellchat_combined_sample,
           interaction_type = input$cellchat_interaction_type
         )
       }
