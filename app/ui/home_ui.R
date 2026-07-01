@@ -36,13 +36,20 @@ home_ui <- function() {
       "To download the integrated mouse skeletal muscle and tumour Seurat objects, and the integrated and split CellChat objects, please visit: (will be published on Zenodo once the manuscript is published)"
     ),
     p(
-      "Codes can be accessed on GitHub (",
+      "Analysis source code can be accessed on GitHub at:",
+      a(
+        "https://github.com/musclesci/MyInCAT",
+        href = "https://github.com/musclesci/MyInCAT",
+        target = "_blank"
+      )
+    ),
+    p(
+      "Web resource source code can be accessed on GitHub at:",
       a(
         "https://github.com/IsaacLafond/MyInCAT",
         href = "https://github.com/IsaacLafond/MyInCAT",
         target = "_blank"
-      ),
-      ")."
+      )
     ),
 
     hr(),

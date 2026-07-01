@@ -11,11 +11,11 @@ mod_cellchat_tab_ui <- function(id) {
             # content:
             mod_cellchat_enrichedpathways_ui(ns("enriched_pathways"))
         ),
-        nav_panel(
-            title = "Cell Interactions",
-            # content:
-            mod_cellchat_cellinteractions_ui(ns("cell_interactions"))
-        ),
+        # nav_panel(
+        #     title = "Cell Interactions",
+        #     # content:
+        #     mod_cellchat_cellinteractions_ui(ns("cell_interactions"))
+        # ),
         nav_panel(
             title = "Plots",
             # content:
@@ -32,7 +32,7 @@ mod_cellchat_tab_server <- function(id, cellchat_object) {
   moduleServer(id, function(input, output, session) {
 
     mod_cellchat_enrichedpathways_server("enriched_pathways", cellchat_object)
-    mod_cellchat_cellinteractions_server("cell_interactions", cellchat_object)
+    # mod_cellchat_cellinteractions_server("cell_interactions", cellchat_object)
     mod_cellchat_plots_server("cellchat_plots", cellchat_object)
 
   })

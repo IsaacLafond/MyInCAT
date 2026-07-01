@@ -93,10 +93,11 @@ ui <- page_navbar(
   ),
 
   # Navbar title as logo link to home
-  title = tags$a(
-    href = "/",
-    tags$img(src = "www/logo.png", height = "30px")
-  ),
+  title = tags$img(src = "www/logo.png", height = "30px"),
+  # tags$a(
+  #   href = "/",
+  #   tags$img(src = "www/logo.png", height = "30px")
+  # ),
 
   sidebar = sidebar(
     title = "Options",
@@ -196,8 +197,6 @@ server <- function(input, output, session) {
     req(sidebar_data$cellchat())
     selected_options <- sidebar_data$cellchat()
     
-    print("Selected CellChat options:")
-    print(selected_options)
     # Get path of the object based on inputs
     if (selected_options$type == "Split") {
       obj_name <- paste("split/cellchat", selected_options$split_sample, selected_options$interaction_type, sep = "_")
