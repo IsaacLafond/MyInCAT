@@ -102,7 +102,7 @@ ui <- page_navbar(
   sidebar = sidebar(
     title = "Options",
     position = "right",
-    width = 300,
+    width = "350px",
     fillable = TRUE,
     fill = TRUE,
     # content:
@@ -213,6 +213,48 @@ server <- function(input, output, session) {
     cellchat_object
   })
 
+
+  # -------------------------
+  # Modal Metadata table
+  # -------------------------
+  output$meta_table <- renderDataTable(
+    options = datatable_options,
+    # content:
+    {
+      req(global_seurat_state())
+
+      state <- global_seurat_state()
+
+      state$sc_subset@meta.data %>%
+        group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
+        summarise(n_cells = n(), .groups = "drop") %>%
+        arrange(experiment, orig.ident, seurat_clusters)
+
+        # # Optimization: Use data.table or fast dplyr for the summary
+        # sc_object()@meta.data %>%
+        #   count(experiment, orig.ident, seurat_clusters, subcluster) %>%
+        #   arrange(experiment, orig.ident, seurat_clusters)
+        # ?????????????????
+    }
+  )
+
+  # Modals
+  observeEvent(sidebar_data$show_metadata(), {
+    req(sidebar_data$show_metadata() > 0) # Ensure it's an actual click
+
+    showModal(modalDialog(
+      title = "Cell Composition Summary",
+      size = "xl",
+      easyClose = TRUE,
+      dataTableOutput(
+        "meta_table"
+      ) %>% with_custom_spinner()
+    ))
+  }, ignoreInit = TRUE)
+
+  # -------------------------
+  # Server modules
+  # -------------------------
   mod_umap_server("umap", global_seurat_state)
   mod_deg_tab_server("deg_tab", global_seurat_state)
   mod_deg_plots_server("deg_plots", global_seurat_state)

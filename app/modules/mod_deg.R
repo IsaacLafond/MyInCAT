@@ -98,19 +98,11 @@ mod_deg_ui <- function(id) {
         )
       ),
       card_footer(
-        layout_columns(
-          col_widths = c(6, 6),
-          class = "m-0",
-          actionButton(
-            ns("show_metadata"),
-            label = "View Cell Composition Summary",
-            class = "btn btn-primary"
-          ),
-          actionButton(
-            ns("show_code"),
-            label = "View Source Code",
-            class = "btn btn-primary"
-          )
+        actionButton(
+          ns("show_code"),
+          icon = icon("code"),
+          label = "View Source Code",
+          class = "btn btn-primary w-100"
         )
       )
     )
@@ -247,18 +239,6 @@ mod_deg_server <- function(id, global_state) {
     )
 
     # Modals
-    observeEvent(input$show_metadata, {
-      showModal(modalDialog(
-        title = "Cell Composition Summary",
-        size = "xl",
-        dataTableOutput(
-          session$ns("meta_table"),
-          height = "100%"
-        ) %>% with_custom_spinner(),
-        easyClose = TRUE
-      ))
-    })
-
     observeEvent(input$show_code, {
       showModal(modalDialog(
         title = "Source Code",

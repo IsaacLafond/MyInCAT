@@ -114,6 +114,17 @@ mod_sidebar_ui <- function(id, all_choices) {
 
     hr(),
 
+    conditionalPanel(
+      condition = "input.main_navbar != 'cellchat'",
+      # content:
+      actionButton(
+        ns("show_metadata"),
+        icon = icon("table"),
+        label = "View Cell Composition Summary",
+        class = "btn btn-secondary w-100 mb-3"
+      ),
+    ),
+
     actionButton(
       inputId = ns("apply"),
       label = "Apply Changes",
@@ -288,7 +299,8 @@ mod_sidebar_server <- function(
     return(list(
       seurat_subset = seurat_subset_params,
       seurat_groupby = seurat_group_by,
-      cellchat = cellchat_state
+      cellchat = cellchat_state,
+      show_metadata = reactive(input$show_metadata)
     ))
 
     # # 1. Define the categories we want to manage

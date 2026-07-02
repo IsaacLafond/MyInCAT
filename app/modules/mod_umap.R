@@ -26,19 +26,11 @@ mod_umap_ui <- function(id) {
       )
     ),
     card_footer(
-      layout_columns(
-        col_widths = c(6, 6),
-        class = "m-0",
-        actionButton(
-          ns("show_metadata"),
-          label = "View Cell Composition Summary",
-          class = "btn btn-primary"
-        ),
-        actionButton(
-          ns("show_code"),
-          label = "View Source Code",
-          class = "btn btn-primary"
-        )
+      actionButton(
+        ns("show_code"),
+        icon = icon("code"),
+        label = "View Source Code",
+        class = "btn btn-primary w-100"
       )
     )
   )
@@ -72,41 +64,6 @@ mod_umap_server <- function(id, global_state) {
         axis.ticks = element_blank()
       )
 
-    })
-
-    # Populate placeholder metadata table
-    output$meta_table <- renderDataTable(
-      options = datatable_options,
-      # content:
-      {
-        req(global_state())
-
-        state <- global_state()
-
-        state$sc_subset@meta.data %>%
-          group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
-          summarise(n_cells = n(), .groups = "drop") %>%
-          arrange(experiment, orig.ident, seurat_clusters)
-
-          # # Optimization: Use data.table or fast dplyr for the summary
-          # sc_object()@meta.data %>%
-          #   count(experiment, orig.ident, seurat_clusters, subcluster) %>%
-          #   arrange(experiment, orig.ident, seurat_clusters)
-          # ?????????????????
-      }
-    )
-
-    # Modals
-    observeEvent(input$show_metadata, {
-      showModal(modalDialog(
-        title = "Cell Composition Summary",
-        size = "xl",
-        dataTableOutput(
-          session$ns("meta_table"),
-          height = "100%"
-        ) %>% with_custom_spinner(),
-        easyClose = TRUE
-      ))
     })
 
     observeEvent(input$show_code, {
