@@ -10,7 +10,18 @@ mod_umap_ui <- function(id) {
     card_header(
       class = "d-flex justify-content-between align-items-center",
       "UMAP Plot",
-      # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+      div(
+        actionButton(
+          ns("show_code"),
+          icon = icon("code"),
+          label = "View Code",
+          class = "btn-sm"
+        ),
+        downloadButton(
+          ns("download_meta"),
+          class = "btn-sm"
+        )
+      )
     ),
     card_body(
       div(
@@ -23,14 +34,6 @@ mod_umap_ui <- function(id) {
           height = "100%",
           fill = TRUE
         ) %>% with_custom_spinner()
-      )
-    ),
-    card_footer(
-      actionButton(
-        ns("show_code"),
-        icon = icon("code"),
-        label = "View Source Code",
-        class = "btn btn-primary w-100"
       )
     )
   )
@@ -66,7 +69,42 @@ mod_umap_server <- function(id, global_state) {
 
     })
 
+    # implement download handler for UMAP plot
+    output$download_meta <- downloadHandler(
+      filename = function() {
+        paste("umap_plot", Sys.Date(), ".png", sep = "")
+      },
+      content = function(file) {
+        req(global_state())
+        state <- global_state()
+
+        ggsave(
+          file,
+          plot = DimPlot(
+            state$sc_subset,
+            reduction = "umap",
+            group.by = state$group_by,
+            repel = TRUE,
+            pt.size = 1
+          ) +
+          ggplot2::labs(title = "", x = "UMAP1", y = "UMAP2") +
+          theme(
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank()
+          ),
+          device = "png",
+          width = 8,
+          height = 6
+        )
+      }
+    )
+
     observeEvent(input$show_code, {
+      req(global_state())
+      state <- global_state()
+      umap_code <- generate_umap_code(state)
+      
       showModal(modalDialog(
         title = "Source Code",
         size = "xl",
