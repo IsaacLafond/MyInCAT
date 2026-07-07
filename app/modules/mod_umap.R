@@ -18,7 +18,7 @@ mod_umap_ui <- function(id) {
           class = "btn-sm"
         ),
         downloadButton(
-          ns("download_meta"),
+          ns("download_plot"),
           class = "btn-sm"
         )
       )
@@ -70,9 +70,9 @@ mod_umap_server <- function(id, global_state) {
     })
 
     # implement download handler for UMAP plot
-    output$download_meta <- downloadHandler(
+    output$download_plot <- downloadHandler(
       filename = function() {
-        paste("umap_plot", Sys.Date(), ".png", sep = "")
+        paste("umap_plot", Sys.time(), ".png", sep = "")
       },
       content = function(file) {
         req(global_state())
