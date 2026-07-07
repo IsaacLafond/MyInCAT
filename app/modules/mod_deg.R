@@ -2,116 +2,121 @@
 # DEG UI
 # -------------------------
 mod_deg_ui <- function(id) {
-    ns <- NS(id)
+  ns <- NS(id)
 
-    degs_settings_popover <- popover(
-      trigger = actionButton(
-        ns("settings_trigger"),
-        label = NULL,
-        icon = icon("gear"),
-        class = "btn-light"
-      ),
-      placement = "auto",
-      # options = list(
-      #   trigger = "click focus"
-      # ),
-      # popover content:
-      fluidRow(
-        pickerInput(
-          ns("ident_1"),
-          label = "Comparison Groups (ident.1):",
-          choices = NULL,
-          multiple = TRUE,
-          width = 250,
-          options = list(
-            "actions-box" = TRUE,
-            "live-search" = TRUE
-          )
-        ),
-        pickerInput(
-          ns("ident_2"),
-          label = "Reference Groups (ident.2):",
-          choices = NULL,
-          multiple = TRUE,
-          width = 250,
-          options = list(
-            "actions-box" = TRUE,
-            "live-search" = TRUE
-          )
-        ),
-        numericInput(
-          ns("pval_cutoff"),
-          label = "Adjusted p-value Cutoff:",
-          width = 250,
-          value = 0.05,
-          min = 0,
-          max = 1,
-          step = 0.01
-        ),
-        numericInput(
-          ns("lower_logfc_cutoff"),
-          label = "Lower avg_log2FC Cutoff:",
-          value = -0.2,
-          step = 0.1,
-          width = "50%"
-        ),
-        numericInput(
-          ns("upper_logfc_cutoff"),
-          label = "Upper avg_log2FC Cutoff:",
-          value = 0.2,
-          step = 0.1,
-          width = "50%"
+  degs_settings_popover <- popover(
+    trigger = actionButton(
+      ns("settings_trigger"),
+      label = NULL,
+      icon = icon("gear"),
+      class = "btn-sm btn-light"
+    ),
+    placement = "auto",
+    # options = list(
+    #   trigger = "click focus"
+    # ),
+    # popover content:
+    fluidRow(
+      pickerInput(
+        ns("ident_1"),
+        label = "Comparison Groups (ident.1):",
+        choices = NULL,
+        multiple = TRUE,
+        width = 250,
+        options = list(
+          "actions-box" = TRUE,
+          "live-search" = TRUE
         )
+      ),
+      pickerInput(
+        ns("ident_2"),
+        label = "Reference Groups (ident.2):",
+        choices = NULL,
+        multiple = TRUE,
+        width = 250,
+        options = list(
+          "actions-box" = TRUE,
+          "live-search" = TRUE
+        )
+      ),
+      numericInput(
+        ns("pval_cutoff"),
+        label = "Adjusted p-value Cutoff:",
+        width = 250,
+        value = 0.05,
+        min = 0,
+        max = 1,
+        step = 0.01
+      ),
+      numericInput(
+        ns("lower_logfc_cutoff"),
+        label = "Lower avg_log2FC Cutoff:",
+        value = -0.2,
+        step = 0.1,
+        width = "50%"
+      ),
+      numericInput(
+        ns("upper_logfc_cutoff"),
+        label = "Upper avg_log2FC Cutoff:",
+        value = 0.2,
+        step = 0.1,
+        width = "50%"
       )
     )
+  )
 
-    card(
-      fill = TRUE,
-      full_screen = TRUE,
-      card_header(
-        class = "d-flex justify-content-between align-items-center",
+  card(
+    fill = TRUE,
+    full_screen = TRUE,
+    card_header(
+      class = "d-flex justify-content-between align-items-center",
 
-        "Differentially Expressed Genes",
+      "Differentially Expressed Genes",
 
-        div(
-          class = "d-flex gap-3",
-          # content:
-          degs_settings_popover,
+      div(
+        class = "d-flex gap-3",
+        # content:
+        degs_settings_popover,
 
-          actionButton(
-            ns("run_deg"),
-            label = "Find DEGs",
-            class = "btn-primary",
-            icon = icon("play")
-          )
-        )
-
-        # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
-      ),
-      card_body(
-        div(
-          class = "d-flex h-100 justify-content-center align-items-center",
-          # content
-          dataTableOutput(
-            ns("deg_table")
-          ) %>% with_custom_spinner(),
-        )
-      ),
-      card_footer(
         actionButton(
           ns("show_code"),
           icon = icon("code"),
-          label = "View Source Code",
-          class = "btn btn-primary w-100"
+          label = "View Code",
+          class = "btn-sm"
+        ),
+        
+        actionButton(
+          ns("download_wrapper"),
+          label = downloadButton(
+            ns("download_table"),
+            class = "btn-sm"
+          ),
+          class = "p-0 border-0",
+          disabled = TRUE
+        ),
+
+        actionButton(
+          ns("run_deg"),
+          label = "Find DEGs",
+          class = "btn-sm btn-primary",
+          icon = icon("play")
+        )
+      )
+
+    ),
+    card_body(
+      div(
+        class = "d-flex h-100 justify-content-center align-items-center",
+        # content
+        dataTableOutput(
+          ns("deg_table")
+        ) %>% with_custom_spinner(
+          hide.ui = TRUE,
+          caption = "Calculating DEGs... this may take a moment."
         )
       )
     )
-
-    #   # Output: DEG results table
-    #   dataTableOutput(
-    #     ns("deg_table"),
-    #     height = "450px"
-    #   ) %>% with_custom_spinner(),
+  )
 }
 
 
@@ -154,10 +159,6 @@ mod_deg_server <- function(id, global_state) {
         need(input$pval_cutoff >= 0 && input$pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1."),
         need(input$lower_logfc_cutoff < input$upper_logfc_cutoff, "Please ensure the lower logFC cutoff is less than the upper logFC cutoff.")
       )
-      
-      # Show a loading notification since FindMarkers takes time
-      showNotification("Calculating DEGs... this may take a moment.", id = "deg_calc", duration = NULL, type = "message")
-      on.exit(removeNotification("deg_calc"), add = TRUE)
       
       # Get the current subsetted object
       state <- global_state()
@@ -216,30 +217,38 @@ mod_deg_server <- function(id, global_state) {
         deg_results()
     })
 
-    # Populate placeholder metadata table
-    output$meta_table <- renderDataTable(
-      options = datatable_options,
-      # content:
-      {
-        req(global_state())
+    observe({
+      updateActionButton(
+        session,
+        "download_wrapper",
+        disabled = TRUE
+      )
+      if (!is.null(deg_results()) && nrow(deg_results()) > 0) {
+        updateActionButton(
+          session,
+          "download_wrapper",
+          disabled = FALSE
+        )
+      }
+    })
 
-        state <- global_state()
-
-        state$sc_subset@meta.data %>%
-          group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
-          summarise(n_cells = n(), .groups = "drop") %>%
-          arrange(experiment, orig.ident, seurat_clusters)
-
-          # # Optimization: Use data.table or fast dplyr for the summary
-          # sc_object()@meta.data %>%
-          #   count(experiment, orig.ident, seurat_clusters, subcluster) %>%
-          #   arrange(experiment, orig.ident, seurat_clusters)
-          # ?????????????????
+    output$download_table <- downloadHandler(
+      filename = function() {
+        paste0("DEGs", Sys.time(), ".csv")
+      },
+      content = function(file) {
+        write.csv(deg_results(), file)
       }
     )
 
     # Modals
     observeEvent(input$show_code, {
+      req(
+        global_state(),
+        input
+      )
+      deg_code <- generate_deg_code(global_state(), input)
+
       showModal(modalDialog(
         title = "Source Code",
         size = "xl",
@@ -262,16 +271,3 @@ mod_deg_server <- function(id, global_state) {
 
   })
 }
-
-
-
-# # 4. Handle the CSV download
-# output$download_deg <- downloadHandler(
-#   filename = function() {
-#     paste0("DEGs_Comparison_", Sys.Date(), ".csv")
-#   },
-#   content = function(file) {
-#     # write.csv includes rownames by default, which preserves the Gene symbols
-#     write.csv(deg_results(), file, row.names = TRUE) 
-#   }
-# )
