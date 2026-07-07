@@ -7,7 +7,11 @@ mod_deg_kegg_ui <- function(id) {
   page_fillable(
     radioGroupButtons(
         inputId = ns("term_type"),
-        choices = c("Up", "Down"),
+        status = "outline-primary btn-sm",
+        choices = c(
+          "<i class='fas fa-arrow-up me-1'></i> Up" = "Up",
+          "<i class='fas fa-arrow-down me-1'></i> Down" = "Down"
+        ),
         selected = "Up",
         justified = TRUE
     ),
@@ -20,12 +24,12 @@ mod_deg_kegg_ui <- function(id) {
         conditionalPanel(
           condition = "input.term_type == 'Up'",
           ns = ns,
-          "Up Terms"
+          "Up KEGG Terms"
         ),
         conditionalPanel(
           condition = "input.term_type == 'Down'",
           ns = ns,
-          "Down Terms"
+          "Down KEGG Terms"
         ),
 
         div(
@@ -35,7 +39,7 @@ mod_deg_kegg_ui <- function(id) {
               ns("settings_trigger"),
               label = NULL,
               icon = icon("gear"),
-              class = "btn-light"
+              class = "btn-sm btn-light"
             ),
             placement = "auto",
             # options = list(
@@ -72,8 +76,11 @@ mod_deg_kegg_ui <- function(id) {
 
           radioGroupButtons(
             inputId = ns("output_type"),
-            choiceNames = list(icon("table"), icon("chart-line")),
-            choiceValues = c("table", "plot"),
+            status = "outline-primary btn-sm",
+            choices = c(
+              "<i class='fas fa-table me-1'></i> Table" = "table",
+              "<i class='fas fa-chart-line me-1'></i> Plot" = "plot"
+            ),
             selected = "table"
           ),
 
@@ -82,8 +89,8 @@ mod_deg_kegg_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_kegg_up"),
-              label = "Find Up KEGG Terms",
-              class = "btn-primary",
+              label = "Find Terms",
+              class = "btn-primary btn-sm",
               icon = icon("play")
             )
           ),
@@ -92,8 +99,8 @@ mod_deg_kegg_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_kegg_down"),
-              label = "Find Down KEGG Terms",
-              class = "btn-primary",
+              label = "Find Terms",
+              class = "btn-primary btn-sm",
               icon = icon("play")
             )
           ),
@@ -112,7 +119,10 @@ mod_deg_kegg_ui <- function(id) {
               # content
               dataTableOutput(
                 ns("kegg_table_up")
-              ) %>% with_custom_spinner()
+              ) %>% with_custom_spinner(
+                hide.ui = TRUE,
+                caption = "Calculating up KEGG terms... this may take a moment."
+              )
             )
           ),
           conditionalPanel(
@@ -146,7 +156,10 @@ mod_deg_kegg_ui <- function(id) {
               # content
               dataTableOutput(
                 ns("kegg_table_down")
-              ) %>% with_custom_spinner()
+              ) %>% with_custom_spinner(
+                hide.ui = TRUE,
+                caption = "Calculating down KEGG terms... this may take a moment."
+              )
             )
           ),
           conditionalPanel(
@@ -179,17 +192,21 @@ mod_deg_kegg_ui <- function(id) {
 # -------------------------
 mod_deg_kegg_server <- function(id, DEGs) {
   moduleServer(id, function(input, output, session) {
+    # Validate DEGs results passed
+    degs_up_valid <- reactive({
+      tryCatch(length(DEGs()$up) > 0, error = function(e) FALSE)
+    })
+    degs_down_valid <- reactive({
+      tryCatch(length(DEGs()$down) > 0, error = function(e) FALSE)
+    })
+
     # UP
     kegg_results_up <- eventReactive(input$run_kegg_up, {
       validate(
+        need(degs_up_valid(), "Please ensure you have a valid DEGs result."),
         need(0 < input$kegg_up_pval_cutoff && input$kegg_up_pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1.")
       )
-
       DEGs <- DEGs()
-
-      # Show a loading notification since enrichKEGG takes time
-      showNotification("Calculating KEGG up terms... this may take a moment.", id = "kegg_up_calc", duration = NULL, type = "message")
-      on.exit(removeNotification("kegg_up_calc"), add = TRUE)
 
       print("===============================")
       print("Starting KEGG Up...")
@@ -214,18 +231,14 @@ mod_deg_kegg_server <- function(id, DEGs) {
 
       return(DEGs_upkegg)
 
-    })
+    }, ignoreNULL = FALSE)
     # DOWN
     kegg_results_down <- eventReactive(input$run_kegg_down, {
       validate(
+        need(degs_down_valid(), "Please ensure you have a valid DEGs result."),
         need(0 < input$kegg_down_pval_cutoff && input$kegg_down_pval_cutoff <= 1, "Please enter a valid p-value cutoff between 0 and 1.")
       )
-
       DEGs <- DEGs()
-
-      # Show a loading notification since enrichKEGG takes time
-      showNotification("Calculating KEGG down terms... this may take a moment.", id = "kegg_down_calc", duration = NULL, type = "message")
-      on.exit(removeNotification("kegg_down_calc"), add = TRUE)
 
       print("===============================")
       print("Starting KEGG Down...")
@@ -250,7 +263,7 @@ mod_deg_kegg_server <- function(id, DEGs) {
 
       return(DEGs_downkegg)
 
-    })
+    }, ignoreNULL = FALSE)
 
     output$kegg_table_up <- renderDataTable(
       rownames = FALSE,
@@ -268,7 +281,10 @@ mod_deg_kegg_server <- function(id, DEGs) {
 
     # Update UI outputs with select inputs
     output$kegg_plot_up_ui <- renderUI({
-      req(kegg_results_up())
+      req(
+        degs_up_valid(),
+        kegg_results_up()
+      )
       results <- kegg_results_up()@result
 
       if (nrow(results) == 0) {
@@ -326,7 +342,10 @@ mod_deg_kegg_server <- function(id, DEGs) {
       }
     })
     output$kegg_plot_down_ui <- renderUI({
-      req(kegg_results_down())
+      req(
+        degs_down_valid(),
+        kegg_results_down()
+      )
       results <- kegg_results_down()@result
 
       if (nrow(results) == 0) {

@@ -7,7 +7,11 @@ mod_deg_go_ui <- function(id) {
   page_fillable(
     radioGroupButtons(
         inputId = ns("term_type"),
-        choices = c("Up", "Down"),
+        status = "outline-primary btn-sm",
+        choices = c(
+          "<i class='fas fa-arrow-up me-1'></i> Up" = "Up",
+          "<i class='fas fa-arrow-down me-1'></i> Down" = "Down"
+        ),
         selected = "Up",
         justified = TRUE
     ),
@@ -20,12 +24,12 @@ mod_deg_go_ui <- function(id) {
         conditionalPanel(
           condition = "input.term_type == 'Up'",
           ns = ns,
-          "Up Terms"
+          "Up GO Terms"
         ),
         conditionalPanel(
           condition = "input.term_type == 'Down'",
           ns = ns,
-          "Down Terms"
+          "Down GO Terms"
         ),
 
         div(
@@ -33,8 +37,11 @@ mod_deg_go_ui <- function(id) {
 
           radioGroupButtons(
             inputId = ns("output_type"),
-            choiceNames = list(icon("table"), icon("chart-line")),
-            choiceValues = c("table", "plot"),
+            status = "outline-primary btn-sm",
+            choices = c(
+              "<i class='fas fa-table me-1'></i> Table" = "table",
+              "<i class='fas fa-chart-line me-1'></i> Plot" = "plot"
+            ),
             selected = "table"
           ),
 
@@ -43,8 +50,8 @@ mod_deg_go_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_go_up"),
-              label = "Find Up GO Terms",
-              class = "btn-primary",
+              label = "Find Terms",
+              class = "btn-primary btn-sm",
               icon = icon("play")
             )
           ),
@@ -53,8 +60,8 @@ mod_deg_go_ui <- function(id) {
             ns = ns,
             actionButton(
               ns("run_go_down"),
-              label = "Find Down GO Terms",
-              class = "btn-primary",
+              label = "Find Terms",
+              class = "btn-primary btn-sm",
               icon = icon("play")
             )
           ),
@@ -73,7 +80,10 @@ mod_deg_go_ui <- function(id) {
               # content
               dataTableOutput(
                 ns("go_table_up")
-              ) %>% with_custom_spinner()
+              ) %>% with_custom_spinner(
+                hide.ui = TRUE,
+                caption = "Calculating up GO terms... this may take a moment."
+              )
             )
           ),
           conditionalPanel(
@@ -107,7 +117,10 @@ mod_deg_go_ui <- function(id) {
               # content
               dataTableOutput(
                 ns("go_table_down")
-              ) %>% with_custom_spinner()
+              ) %>% with_custom_spinner(
+                hide.ui = TRUE,
+                caption = "Calculating down GO terms... this may take a moment."
+              )
             )
           ),
           conditionalPanel(
@@ -140,13 +153,20 @@ mod_deg_go_ui <- function(id) {
 # -------------------------
 mod_deg_go_server <- function(id, DEGs) {
   moduleServer(id, function(input, output, session) {
+    # Validate DEGs results passed
+    degs_up_valid <- reactive({
+      tryCatch(length(DEGs()$up) > 0, error = function(e) FALSE)
+    })
+    degs_down_valid <- reactive({
+      tryCatch(length(DEGs()$down) > 0, error = function(e) FALSE)
+    })
+
     # UP
     go_results_up <- eventReactive(input$run_go_up, {
+      validate(
+        need(degs_up_valid(), "Please ensure you have a valid DEGs result.")
+      )
       DEGs <- DEGs()
-
-      # Show a loading notification since enrichGO takes time
-      showNotification("Calculating GO up terms... this may take a moment.", id = "go_up_calc", duration = NULL, type = "message")
-      on.exit(removeNotification("go_up_calc"), add = TRUE)
 
       print("===============================")
       print("Starting GO Up...")
@@ -159,14 +179,14 @@ mod_deg_go_server <- function(id, DEGs) {
 
       return(DEGs_upgo)
 
-    })
+    }, ignoreNULL = FALSE)
+
     # DOWN
     go_results_down <- eventReactive(input$run_go_down, {
+      validate(
+        need(degs_down_valid(), "Please ensure you have a valid DEGs result.")
+      )
       DEGs <- DEGs()
-
-      # Show a loading notification since enrichGO takes time
-      showNotification("Calculating GO down terms... this may take a moment.", id = "go_down_calc", duration = NULL, type = "message")
-      on.exit(removeNotification("go_down_calc"), add = TRUE)
 
       print("===============================")
       print("Starting GO Down...")
@@ -179,7 +199,7 @@ mod_deg_go_server <- function(id, DEGs) {
 
       return(DEGs_downgo)
 
-    })
+    }, ignoreNULL = FALSE)
 
     output$go_table_up <- renderDataTable(
       rownames = FALSE,
@@ -197,7 +217,10 @@ mod_deg_go_server <- function(id, DEGs) {
 
     # Update UI outputs with select inputs
     output$go_plot_up_ui <- renderUI({
-      req(go_results_up())
+      req(
+        degs_up_valid(),
+        go_results_up()
+      )
       results <- go_results_up()@result
 
       if (nrow(results) == 0) {
@@ -255,7 +278,10 @@ mod_deg_go_server <- function(id, DEGs) {
       }
     })
     output$go_plot_down_ui <- renderUI({
-      req(go_results_down())
+      req(
+        degs_down_valid(),
+        go_results_down()
+      )
       results <- go_results_down()@result
 
       if (nrow(results) == 0) {
@@ -404,18 +430,3 @@ mod_deg_go_server <- function(id, DEGs) {
 
   })
 }
-
-# ### GO terms
-
-# ```{r, include=FALSE}
-
-# ### View GO terms on website
-# view(DEGs_upgo)
-# view(DEGs_downgo)
-
-# ### Download GO terms spreadsheet
-# write.csv(DEGs_upgo, file = "DEGs_upgo.csv", row.names = FALSE)
-# write.csv(DEGs_downgo, file = "DEGs_downgo.csv", row.names = FALSE)
-# ```
-
-### NOTE - For specifying FoldEnrichment, Count, p.adjust, I want these as the default setting. Is there a way to pick and choose which values you want to customize? Where I specified these values, I would like the option of specifying GeneRatio, BgRatio, RichFactor, FoldEnrichment, zScore, pvalue, p.adjust, qvalue, Count. Then the labels would need to adjust accordingly.
