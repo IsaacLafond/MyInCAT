@@ -8,6 +8,7 @@ mod_deg_plots_ui <- function(id, feature_choices) {
     # plot type select input
     radioGroupButtons(
         inputId = ns("plot_type"),
+        status = "outline-primary btn-sm",
         choices = c(
           "Dot Plot" = "dot",
           "Violin Plot" = "violin",
