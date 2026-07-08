@@ -223,10 +223,20 @@ mod_deg_server <- function(id, global_state) {
         "download_wrapper",
         disabled = TRUE
       )
+      updateActionButton(
+        session,
+        "show_code",
+        disabled = TRUE
+      )
       if (!is.null(deg_results()) && nrow(deg_results()) > 0) {
         updateActionButton(
           session,
           "download_wrapper",
+          disabled = FALSE
+        )
+        updateActionButton(
+          session,
+          "show_code",
           disabled = FALSE
         )
       }
