@@ -11,6 +11,7 @@ mod_umap_ui <- function(id) {
       class = "d-flex justify-content-between align-items-center",
       "UMAP Plot",
       div(
+        class = "d-flex gap-3",
         actionButton(
           ns("show_code"),
           icon = icon("code"),
