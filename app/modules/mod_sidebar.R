@@ -49,6 +49,10 @@ mod_sidebar_ui <- function(id, all_choices) {
 
       actionButton(
         inputId = ns("reset_subset"),
+        icon = icon(
+          "arrow-turn-up",
+          style = "transform: rotate(-90deg);"
+        ),
         label = "Reset",
         class = "w-100"
       )
@@ -127,6 +131,7 @@ mod_sidebar_ui <- function(id, all_choices) {
 
     actionButton(
       inputId = ns("apply"),
+      icon = icon("check"),
       label = "Apply Changes",
       class = "btn-primary w-100 mb-3"
     )
