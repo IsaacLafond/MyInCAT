@@ -20,6 +20,7 @@ library(dplyr)
 source("utils/shared_options.R")
 source("utils/umap_code.R")
 source("utils/deg_code.R")
+source("utils/go_code.R")
 source("utils/choices.R")
 
 # App modules

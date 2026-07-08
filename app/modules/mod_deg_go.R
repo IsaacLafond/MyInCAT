@@ -45,6 +45,23 @@ mod_deg_go_ui <- function(id) {
             selected = "table"
           ),
 
+          actionButton(
+            ns("show_code"),
+            icon = icon("code"),
+            label = "View Code",
+            class = "btn-sm"
+          ),
+
+          actionButton(
+            ns("download_wrapper"),
+            label = downloadButton(
+              ns("download_go"),
+              class = "btn-sm"
+            ),
+            class = "p-0 border-0",
+            disabled = TRUE
+          ),
+
           conditionalPanel(
             condition = "input.term_type == 'Up'",
             ns = ns,
@@ -161,6 +178,40 @@ mod_deg_go_server <- function(id, DEGs) {
       tryCatch(length(DEGs()$down) > 0, error = function(e) FALSE)
     })
 
+    # Validate GO results
+    go_up_valid <- reactive({
+      tryCatch(length(go_results_up()@result) > 0, error = function(e) FALSE)
+    })
+    go_down_valid <- reactive({
+      tryCatch(length(go_results_down()@result) > 0, error = function(e) FALSE)
+    })
+
+    # show code/download disabling logic
+    observe({
+      req(input$term_type)
+      is_disabled <- TRUE
+
+      if (input$term_type == "Up") {
+        is_disabled <- !go_up_valid()
+      } else if (input$term_type == "Down") {
+        is_disabled <- !go_down_valid()
+      } else { # catch all disable for smt weird
+        is_disabled <- TRUE
+      }
+      # update buttons
+      updateActionButton(
+        session,
+        "download_wrapper",
+        disabled = is_disabled
+      )
+      updateActionButton(
+        session,
+        "show_code",
+        disabled = is_disabled
+      )
+
+    })
+
     # UP
     go_results_up <- eventReactive(input$run_go_up, {
       validate(
@@ -179,7 +230,7 @@ mod_deg_go_server <- function(id, DEGs) {
 
       return(DEGs_upgo)
 
-    }, ignoreNULL = FALSE)
+    })
 
     # DOWN
     go_results_down <- eventReactive(input$run_go_down, {
@@ -199,7 +250,7 @@ mod_deg_go_server <- function(id, DEGs) {
 
       return(DEGs_downgo)
 
-    }, ignoreNULL = FALSE)
+    })
 
     output$go_table_up <- renderDataTable(
       rownames = FALSE,
@@ -427,6 +478,92 @@ mod_deg_go_server <- function(id, DEGs) {
         axis.ticks = element_line(color = "black")
       )
     }
+
+    # Downloads
+    output$download_go <- downloadHandler(
+      filename = function() {
+        req(input$term_type, input$output_type)
+
+        if (input$output_type == "plot") { # want plot
+          paste0(input$term_type, "_GO_plot", Sys.time(), ".png")
+        } else if (input$output_type == "table") { # want table
+          paste0(input$term_type, "_GO_terms", Sys.time(), ".csv")
+        } else { # catch all error
+          paste0(input$term_type, "_GO_", input$output_type, "_error", ".txt")
+        }
+      },
+      content = function(file) {
+        req(input$term_type, input$output_type)
+
+        if (input$term_type == "Up") { # Up
+          if (input$output_type == "table") { # want table
+            write.csv(go_results_up()@result, file, row.names = FALSE)
+          } else if (input$output_type == "plot") { # want plot
+            # build plot
+            ggsave(
+              file,
+              plot = make_go_plot(
+                df = go_results_up()@result,
+                plot_title = input$go_up_title,
+                selected_terms = input$go_up_terms,
+                x_col = input$go_up_x,
+                size_col = input$go_up_size,
+                color_col = input$go_up_color
+              ),
+              device = "png",
+              width = 8,
+              height = 6
+            )
+          } else { # up catch error
+            writeLines("Up GO Download error.", file)
+          }
+
+        } else if (input$term_type == "Down") { # Down
+          if (input$output_type == "table") { # want table
+            write.csv(go_results_down()@result, file, row.names = FALSE)
+          } else if (input$output_type == "plot") { # want plot
+            # build plot
+            ggsave(
+              file,
+              plot = make_go_plot(
+                df = go_results_down()@result,
+                plot_title = input$go_down_title,
+                selected_terms = input$go_down_terms,
+                x_col = input$go_down_x,
+                size_col = input$go_down_size,
+                color_col = input$go_down_color
+              ),
+              device = "png",
+              width = 8,
+              height = 6
+            )
+          } else { # down catch error
+            writeLines("Down GO Download error.", file)
+          }
+        } else { # catch all error
+          writeLines("GO Download error.", file)
+        }
+      }
+    )
+
+    # Modals
+    observeEvent(input$show_code, {
+      req(
+        input
+      )
+      go_code <- generate_go_code(
+        input,
+        input$term_type,
+        input$output_type == "plot"
+      )
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(go_code),
+        easyClose = TRUE
+      ))
+    })
 
   })
 }
