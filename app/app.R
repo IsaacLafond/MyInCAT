@@ -22,6 +22,7 @@ source("utils/umap_code.R")
 source("utils/deg_code.R")
 source("utils/go_code.R")
 source("utils/kegg_code.R")
+source("utils/dot_plot_code.R")
 source("utils/choices.R")
 
 # App modules
