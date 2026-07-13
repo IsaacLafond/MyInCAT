@@ -11,15 +11,36 @@ mod_vln_plot_ui <- function(id, feature_choices) {
       class = "d-flex justify-content-between align-items-center",
       "Violin Plot",
 
-      virtualSelectInput(
-        inputId = ns("vln_features"),
-        label = NULL,
-        placeholder = "Select feature...",
-        choices = feature_choices,
-        search = TRUE,
-        width = "250px"
-      ),
-      # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+      div(
+        class = "d-flex gap-3",
+
+        virtualSelectInput(
+          inputId = ns("vln_features"),
+          label = NULL,
+          placeholder = "Select feature...",
+          choices = feature_choices,
+          search = TRUE,
+          width = "250px"
+        ),
+
+        actionButton(
+          ns("show_code"),
+          icon = icon("code"),
+          label = "View Code",
+          class = "btn-sm",
+          disabled = TRUE
+        ),
+
+        actionButton(
+          ns("download_wrapper"),
+          label = downloadButton(
+            ns("download_vln"),
+            class = "btn-sm"
+          ),
+          class = "p-0 border-0",
+          disabled = TRUE
+        )
+      )
     ),
     card_body(
       div(
@@ -60,17 +81,9 @@ mod_vln_plot_ui <- function(id, feature_choices) {
 mod_vln_plot_server <- function(id, global_state) {
   moduleServer(id, function(input, output, session) {
 
-    output$vln_plot <- renderPlot({
+    build_vln_plot <- function() {
       state <- global_state()
       feature <- input$vln_features
-
-      validate(
-        need(!is.null(feature), "Please select a feature to display the plot."),
-      )
-
-      # print(
-      #   AverageExpression(state$sc_subset, features = gene_name)#$RNA[gene_name, ]
-      # )
 
       VlnPlot(
         state$sc_subset, 
@@ -85,32 +98,62 @@ mod_vln_plot_server <- function(id, global_state) {
         plot.title = element_text(face = "italic")
       ) +
       labs(x = NULL, y = "Expression", title = feature)
+    }
+
+    output$vln_plot <- renderPlot({
+      validate(
+        need(!is.null(input$vln_features), "Please select a feature to display the plot."),
+      )
+
+      # print(
+      #   AverageExpression(state$sc_subset, features = gene_name)#$RNA[gene_name, ]
+      # )
+
+      build_vln_plot()
 
     })
 
+    observe({
+      valid <- !is.null(global_state()) && !is.null(input$vln_features)
+      updateActionButton(
+        session,
+        "download_wrapper",
+        disabled = !valid
+      )
+      updateActionButton(
+        session,
+        "show_code",
+        disabled = !valid
+      )
+    })
 
-#     # Populate placeholder metadata table
-#     output$meta_table <- renderTable(
-#       width = "100%",
-#       striped = TRUE,
-#       hover = TRUE,
-#       bordered = TRUE,
-#       # content:
-#       {
-#         req(sc_object())
+    output$download_vln <- downloadHandler(
+      filename = function() paste0("vln_plot_", Sys.time(), ".png"),
+      content = function(file) {
+        ggsave(
+          file,
+          plot = build_vln_plot(),
+          device = "png",
+          width = 8,
+          height = 6
+        )
+      }
+    )
 
-#         sc_object()@meta.data %>%
-#           group_by(experiment, orig.ident, seurat_clusters, subcluster) %>%
-#           summarise(n_cells = n(), .groups = "drop") %>%
-#           arrange(experiment, orig.ident, seurat_clusters)
+    observeEvent(input$show_code, {
+      req(
+        global_state(),
+        input$vln_features
+      )
+      vln_code <- generate_vln_plot_code(global_state(), input$vln_features)
 
-#           # # Optimization: Use data.table or fast dplyr for the summary
-#           # sc_object()@meta.data %>%
-#           #   count(experiment, orig.ident, seurat_clusters, subcluster) %>%
-#           #   arrange(experiment, orig.ident, seurat_clusters)
-#           # ?????????????????
-#       }
-#     )
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(vln_code),
+        easyClose = TRUE
+      ))
+    })
 
   })
 }
