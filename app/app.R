@@ -24,6 +24,7 @@ source("utils/go_code.R")
 source("utils/kegg_code.R")
 source("utils/dot_plot_code.R")
 source("utils/vln_plot_code.R")
+source("utils/box_plot_code.R")
 source("utils/choices.R")
 
 # App modules
