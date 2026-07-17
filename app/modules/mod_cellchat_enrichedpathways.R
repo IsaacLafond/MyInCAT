@@ -35,6 +35,7 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
   page_fillable(
     radioGroupButtons(
         inputId = ns("current_table"),
+        status = "outline-primary btn-sm",
         choices = c("Enriched LR Pairs", "Cell Interactions"),
         selected = "Enriched LR Pairs",
         justified = TRUE

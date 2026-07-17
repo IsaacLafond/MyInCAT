@@ -37,6 +37,7 @@ mod_cellchat_plots_ui <- function(id) {
   page_fillable(
     radioGroupButtons(
       inputId = ns("current_plot"),
+      status = "outline-primary btn-sm",
       choices = c("Heatmap", "Circle", "Chord"),
       selected = "Heatmap",
       justified = TRUE
