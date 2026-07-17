@@ -38,9 +38,10 @@ mod_dot_plot_ui <- function(id, feature_choices) {
           ns("download_wrapper"),
           label = downloadButton(
             ns("download_dot"),
-            class = "btn-sm"
+            class = "btn-sm d-flex justify-content-center align-items-center w-100 h-100",
+            style = "gap: 1ch"
           ),
-          class = "p-0 border-0",
+          class = "p-0 border-0 bg-transparent",
           disabled = TRUE
         )
       )
