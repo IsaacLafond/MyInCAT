@@ -4,36 +4,6 @@
 mod_cellchat_plots_ui <- function(id) {
   ns <- NS(id)
 
-  plots_popover <- popover(
-    trigger = actionButton(
-      ns("settings_trigger"),
-      label = NULL,
-      icon = icon("gear"),
-      class = "btn-light"
-    ),
-    placement = "auto",
-    # options = list(
-    #   trigger = "click focus"
-    # ),
-    # popover content:
-    fluidRow(
-      pickerInput(
-        ns("source_cells"),
-        label = "Source Cells:",
-        stateInput = TRUE,
-        choices = NULL,
-        multiple = TRUE
-      ),
-      pickerInput(
-        ns("target_cells"),
-        label = "Target Cells:",
-        stateInput = TRUE,
-        choices = NULL,
-        multiple = TRUE
-      )
-    )
-  )
-
   page_fillable(
     radioGroupButtons(
       inputId = ns("current_plot"),
@@ -131,7 +101,7 @@ mod_cellchat_plots_ui <- function(id) {
               ns("circle_settings_trigger"),
               label = NULL,
               icon = icon("gear"),
-              class = "btn-light"
+              class = "btn-sm btn-light"
             ),
             placement = "auto",
             # options = list(
@@ -195,7 +165,7 @@ mod_cellchat_plots_ui <- function(id) {
               ns("chord_settings_trigger"),
               label = NULL,
               icon = icon("gear"),
-              class = "btn-light"
+              class = "btn-sm btn-light"
             ),
             placement = "auto",
             # options = list(

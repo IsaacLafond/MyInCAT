@@ -9,7 +9,7 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
       ns("settings_trigger"),
       label = NULL,
       icon = icon("gear"),
-      class = "btn-light"
+      class = "btn-sm btn-light"
     ),
     placement = "auto",
     # options = list(
@@ -135,11 +135,7 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
 
     # })
 
-    output$enriched_ligand_receptor_table <- renderDataTable(
-      rownames = FALSE,
-      options = datatable_options,
-      {
-
+    enriched_ligand_receptors <- reactive({
       req(cellchat_object())
 
       cc_obj <- cellchat_object()
@@ -152,6 +148,14 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
       )
       out$pairLR
 
+    })
+
+    output$enriched_ligand_receptor_table <- renderDataTable(
+      rownames = FALSE,
+      options = datatable_options,
+      {
+        req(enriched_ligand_receptors)
+        enriched_ligand_receptors()
     })
 
     # ==========================
