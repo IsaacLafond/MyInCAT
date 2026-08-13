@@ -34,15 +34,36 @@ mod_cellchat_plots_ui <- function(id) {
             ns = ns,
             "Contribution Heatmap",
           ),
-          # select between active heatmap
-          radioGroupButtons(
-            inputId = ns("current_heatmap"),
-            choices = c("Interaction", "Contribution"),
-            selected = "Interaction",
-            justified = FALSE,
-            size = "sm"
-          ),
-          # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+          div(
+            class = "d-flex gap-3",
+
+            # select between active heatmap
+            radioGroupButtons(
+              inputId = ns("current_heatmap"),
+              choices = c("Interaction", "Contribution"),
+              selected = "Interaction",
+              justified = FALSE,
+              size = "sm"
+            ),
+
+            actionButton(
+              ns("show_heatmap_code"),
+              icon = icon("code"),
+              label = "View Code",
+              class = "btn-sm",
+              disabled = TRUE
+            ),
+
+            actionButton(
+              ns("heatmap_download_wrapper"),
+              label = downloadButton(
+                ns("download_heatmap"),
+                class = "btn-sm",
+              ),
+              class = "p-0 border-0",
+              disabled = TRUE
+            )
+          )
         ),
         card_body(
           div(
@@ -96,42 +117,64 @@ mod_cellchat_plots_ui <- function(id) {
           class = "d-flex justify-content-between align-items-center",
           # title if interaction
           "Circle Plot",
-          popover(
-            trigger = actionButton(
-              ns("circle_settings_trigger"),
-              label = NULL,
-              icon = icon("gear"),
-              class = "btn-sm btn-light"
-            ),
-            placement = "auto",
-            # options = list(
-            #   trigger = "click focus"
-            # ),
-            # popover content:
-            fluidRow(
-              pickerInput(
-                ns("circle_source_cells"),
-                label = "Source Cells:",
-                stateInput = TRUE,
-                choices = NULL,
-                multiple = TRUE
+
+          div(
+            class = "d-flex gap-3",
+
+            popover(
+              trigger = actionButton(
+                ns("circle_settings_trigger"),
+                label = NULL,
+                icon = icon("gear"),
+                class = "btn-sm btn-light"
               ),
-              pickerInput(
-                ns("circle_target_cells"),
-                label = "Target Cells:",
-                stateInput = TRUE,
-                choices = NULL,
-                multiple = TRUE
-              ),
-              # checkbox to set label.edge T/F for circle plot
-              checkboxInput(
-                ns("circle_label_edge"),
-                label = "Show Edge Labels",
-                value = TRUE
+              placement = "auto",
+              # options = list(
+              #   trigger = "click focus"
+              # ),
+              # popover content:
+              fluidRow(
+                pickerInput(
+                  ns("circle_source_cells"),
+                  label = "Source Cells:",
+                  stateInput = TRUE,
+                  choices = NULL,
+                  multiple = TRUE
+                ),
+                pickerInput(
+                  ns("circle_target_cells"),
+                  label = "Target Cells:",
+                  stateInput = TRUE,
+                  choices = NULL,
+                  multiple = TRUE
+                ),
+                # checkbox to set label.edge T/F for circle plot
+                checkboxInput(
+                  ns("circle_label_edge"),
+                  label = "Show Edge Labels",
+                  value = TRUE
+                )
               )
+            ),
+
+            actionButton(
+              ns("show_circle_code"),
+              icon = icon("code"),
+              label = "View Code",
+              class = "btn-sm",
+              disabled = TRUE
+            ),
+
+            actionButton(
+              ns("circle_download_wrapper"),
+              label = downloadButton(
+                ns("download_circle"),
+                class = "btn-sm",
+              ),
+              class = "p-0 border-0",
+              disabled = TRUE
             )
           )
-          # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
         ),
         card_body(
           div(
@@ -160,43 +203,65 @@ mod_cellchat_plots_ui <- function(id) {
           class = "d-flex justify-content-between align-items-center",
           # title if interaction
           "Chord Plot",
-          popover(
-            trigger = actionButton(
-              ns("chord_settings_trigger"),
-              label = NULL,
-              icon = icon("gear"),
-              class = "btn-sm btn-light"
-            ),
-            placement = "auto",
-            # options = list(
-            #   trigger = "click focus"
-            # ),
-            # popover content:
-            fluidRow(
-              pickerInput(
-                ns("chord_pathway"),
-                label = "Select Pathway:",
-                stateInput = TRUE,
-                choices = NULL,
-                multiple = FALSE
+
+          div(
+            class = "d-flex gap-3",
+
+            popover(
+              trigger = actionButton(
+                ns("chord_settings_trigger"),
+                label = NULL,
+                icon = icon("gear"),
+                class = "btn-sm btn-light"
               ),
-              pickerInput(
-                ns("chord_source_cells"),
-                label = "Source Cells:",
-                stateInput = TRUE,
-                choices = NULL,
-                multiple = TRUE
-              ),
-              pickerInput(
-                ns("chord_target_cells"),
-                label = "Target Cells:",
-                stateInput = TRUE,
-                choices = NULL,
-                multiple = TRUE
+              placement = "auto",
+              # options = list(
+              #   trigger = "click focus"
+              # ),
+              # popover content:
+              fluidRow(
+                pickerInput(
+                  ns("chord_pathway"),
+                  label = "Select Pathway:",
+                  stateInput = TRUE,
+                  choices = NULL,
+                  multiple = FALSE
+                ),
+                pickerInput(
+                  ns("chord_source_cells"),
+                  label = "Source Cells:",
+                  stateInput = TRUE,
+                  choices = NULL,
+                  multiple = TRUE
+                ),
+                pickerInput(
+                  ns("chord_target_cells"),
+                  label = "Target Cells:",
+                  stateInput = TRUE,
+                  choices = NULL,
+                  multiple = TRUE
+                )
               )
+            ),
+
+            actionButton(
+              ns("show_chord_code"),
+              icon = icon("code"),
+              label = "View Code",
+              class = "btn-sm",
+              disabled = TRUE
+            ),
+
+            actionButton(
+              ns("chord_download_wrapper"),
+              label = downloadButton(
+                ns("download_chord"),
+                class = "btn-sm",
+              ),
+              class = "p-0 border-0",
+              disabled = TRUE
             )
           )
-          # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
         ),
         card_body(
           div(
@@ -219,13 +284,62 @@ mod_cellchat_plots_ui <- function(id) {
 # -------------------------
 # CellChat Plots server
 # -------------------------
-mod_cellchat_plots_server <- function(id, cellchat_object) {
+mod_cellchat_plots_server <- function(id, cellchat_object, sidebar_selections) {
   moduleServer(id, function(input, output, session) {
 
     circle_src_on_close <- reactiveVal(NULL)
     circle_tgt_on_close <- reactiveVal(NULL)
     chord_src_on_close <- reactiveVal(NULL)
     chord_tgt_on_close <- reactiveVal(NULL)
+
+    # -------------------------
+    # Validity + button toggling
+    # -------------------------
+
+    # Heatmap: one pair of buttons covers whichever sub-view is active
+    interaction_heatmap_valid <- reactive({
+      tryCatch(!is.null(cellchat_object()@net$weight), error = function(e) FALSE)
+    })
+    contribution_heatmap_valid <- reactive({
+      tryCatch(!is.null(cellchat_object()) && length(input$heatmap_pattern) > 0, error = function(e) FALSE)
+    })
+    heatmap_valid <- reactive({
+      if (identical(input$current_heatmap, "Contribution")) {
+        contribution_heatmap_valid()
+      } else {
+        interaction_heatmap_valid()
+      }
+    })
+    observe({
+      updateActionButton(session, "show_heatmap_code", disabled = !heatmap_valid())
+      updateActionButton(session, "heatmap_download_wrapper", disabled = !heatmap_valid())
+    })
+
+    circle_valid <- reactive({
+      tryCatch(
+        !is.null(cellchat_object()@net$count) &&
+          length(circle_src_on_close()) > 0 &&
+          length(circle_tgt_on_close()) > 0,
+        error = function(e) FALSE
+      )
+    })
+    observe({
+      updateActionButton(session, "show_circle_code", disabled = !circle_valid())
+      updateActionButton(session, "circle_download_wrapper", disabled = !circle_valid())
+    })
+
+    chord_valid <- reactive({
+      tryCatch(
+        length(input$chord_pathway) > 0 &&
+          length(chord_src_on_close()) > 0 &&
+          length(chord_tgt_on_close()) > 0,
+        error = function(e) FALSE
+      )
+    })
+    observe({
+      updateActionButton(session, "show_chord_code", disabled = !chord_valid())
+      updateActionButton(session, "chord_download_wrapper", disabled = !chord_valid())
+    })
 
     observe({
       req(cellchat_object())
@@ -394,5 +508,60 @@ mod_cellchat_plots_server <- function(id, cellchat_object) {
         lab.cex = 0.5
       )
     })
+
+    # Download handlers
+    output$download_heatmap <- downloadHandler(
+      filename = function() {
+        filename_map <- c(
+          "Interaction" = paste0("cellchat_interaction_heatmap_", Sys.Date(), ".png"),
+          "Contribution" = paste0("cellchat_contribution_heatmap_", Sys.Date(), ".png")
+        )
+        filename_map[[input$current_heatmap]]
+      },
+      content = function(file) {
+        if (input$current_heatmap == "Interaction") {
+          png(file, width = 2000, height = 2000, res = 300)
+          print(netVisual_heatmap(
+            cellchat_object(),
+            slot.name = "net",
+            measure = "weight",
+            color.heatmap = "Reds"
+          ))
+          dev.off()
+        } else if (input$current_heatmap == "Contribution") {
+          png(file, width = 3000, height = 3000, res = 300)
+          print(netAnalysis_signalingRole_heatmap(
+            cellchat_object(),
+            pattern = input$heatmap_pattern,
+            slot.name = "netP",
+            color.heatmap = "Reds",
+            width = 20,
+            height = 20
+          ))
+          dev.off()
+        }
+      }
+    )
+
+    # Modals for code viewing
+    observeEvent(input$show_heatmap_code, {
+      req(
+        sidebar_selections(),
+        input$current_heatmap
+      )
+      heatmap_code_map <- c(
+        "Interaction" = generate_interaction_heatmap_code(sidebar_selections),
+        "Contribution" = generate_contribution_heatmap_code(sidebar_selections, input$heatmap_pattern)
+      )
+      heatmap_code <- heatmap_code_map[[input$current_heatmap]]
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(heatmap_code),
+        easyClose = TRUE
+      ))
+    })
+
   })
 }

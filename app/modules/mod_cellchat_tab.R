@@ -33,7 +33,7 @@ mod_cellchat_tab_server <- function(id, cellchat_object, sidebar_selections) {
 
     mod_cellchat_enrichedpathways_server("enriched_pathways", cellchat_object, sidebar_selections)
     # mod_cellchat_cellinteractions_server("cell_interactions", cellchat_object)
-    mod_cellchat_plots_server("cellchat_plots", cellchat_object)
+    mod_cellchat_plots_server("cellchat_plots", cellchat_object, sidebar_selections)
 
   })
 }
