@@ -318,8 +318,12 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object, sidebar_se
       ))
     })
     observeEvent(input$show_interactions_code, {
-      req()
-      int_code <- generate_interactions_code()
+      req(
+        sidebar_selections(),
+        input$source_cells,
+        input$target_cells
+      )
+      int_code <- generate_interactions_code(sidebar_selections, input$source_cells, input$target_cells)
 
       showModal(modalDialog(
         title = "Source Code",
