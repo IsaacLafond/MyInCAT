@@ -51,15 +51,57 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
           ns = ns,
           # content:
           "Enriched ligand-receptor pairs",
-          # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+
+          div(
+            class = "d-flex gap-3",
+
+            actionButton(
+              ns("show_lr_code"),
+              icon = icon("code"),
+              label = "View Code",
+              class = "btn-sm",
+              disabled = TRUE
+            ),
+
+            actionButton(
+              ns("lr_download_wrapper"),
+              label = downloadButton(
+                ns("download_lr"),
+                class = "btn-sm",
+              ),
+              class = "p-0 border-0",
+              disabled = TRUE
+            )
+          )
         ),
         conditionalPanel(
           condition = "input.current_table == 'Cell Interactions'",
           ns = ns,
           # content:
           "Cell Interaction Table",
-          interactions_popover
-          # downloadButton(ns("download_meta"), "Download CSV", class = "btn-sm")
+
+          div(
+            class = "d-flex gap-3",
+            interactions_popover,
+
+            actionButton(
+              ns("show_interactions_code"),
+              icon = icon("code"),
+              label = "View Code",
+              class = "btn-sm",
+              disabled = TRUE
+            ),
+
+            actionButton(
+              ns("interactions_download_wrapper"),
+              label = downloadButton(
+                ns("download_interactions"),
+                class = "btn-sm",
+              ),
+              class = "p-0 border-0",
+              disabled = TRUE
+            )
+          )
         )
       ),
       card_body(
@@ -109,7 +151,7 @@ mod_cellchat_enrichedpathways_ui <- function(id) {
 # -------------------------
 # CellChat Enriched Pathways server
 # -------------------------
-mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
+mod_cellchat_enrichedpathways_server <- function(id, cellchat_object, sidebar_selections) {
   moduleServer(id, function(input, output, session) {
 
     # ==========================
@@ -134,6 +176,41 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
     #   df
 
     # })
+
+    observe({
+      lr_valid <- tryCatch(length(enriched_ligand_receptors()) > 0, error = FALSE)
+
+      updateActionButton(
+        session,
+        "show_lr_code",
+        disabled = !lr_valid
+      )
+      updateActionButton(
+        session,
+        "lr_download_wrapper",
+        disabled = !lr_valid
+      )
+    })
+
+    observe({
+      interactions_valid <- tryCatch(
+        length(netP()) > 0 &&
+        length(input$source_cells) > 0 &&
+        length(input$target_cells) > 0,
+        error = FALSE
+      )
+
+      updateActionButton(
+        session,
+        "show_interactions_code",
+        disabled = !interactions_valid
+      )
+      updateActionButton(
+        session,
+        "interactions_download_wrapper",
+        disabled = !interactions_valid
+      )
+    })
 
     enriched_ligand_receptors <- reactive({
       req(cellchat_object())
@@ -173,12 +250,14 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
       updatePickerInput(
         session,
         "source_cells",
-        choices = unique(x$source)
+        choices = unique(x$source),
+        selected = unique(x$source)
       )
       updatePickerInput(
         session,
         "target_cells",
-        choices = unique(x$target)
+        choices = unique(x$target),
+        selected = unique(x$target)
       )
     })
 
@@ -186,18 +265,69 @@ mod_cellchat_enrichedpathways_server <- function(id, cellchat_object) {
       rownames = FALSE,
       options = datatable_options,
     {
+      validate(
+        need(length(netP()) > 0, "No results."),
+        need(length(input$source_cells) > 0, "Please select at least 1 source cell."),
+        need(length(input$target_cells) > 0, "Please select at least 1 target cell.")
+      )
       x <- netP()
 
-      source_subset <- input$source_cells %||% x$source
-      target_subset <- input$target_cells %||% x$target
-
       netP_subset <- x[
-        x$source %in% source_subset &
-        x$target %in% target_subset,
+        x$source %in% input$source_cells &
+        x$target %in% input$target_cells,
       ]
 
       netP_subset
 
     })
+
+    # Downloads
+    output$download_lr <- downloadHandler(
+      filename = function() {
+        paste0("lr_pairs_", Sys.time(), ".csv")
+      },
+      content = function(file) {
+        write.csv(enriched_ligand_receptors(), file)
+      }
+    )
+
+    output$download_interactions <- downloadHandler(
+      filename = function() {
+        paste0("interactions_", Sys.time(), ".csv")
+      },
+      content = function(file) {
+        x <- netP()
+
+        write.csv(
+          x[x$source %in% input$source_cells & x$target %in% input$target_cells,],
+          file
+        )
+      }
+    )
+
+    # Modals
+    observeEvent(input$show_lr_code, {
+      req(sidebar_selections())
+      lr_code <- generate_lr_code(sidebar_selections)
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(lr_code),
+        easyClose = TRUE
+      ))
+    })
+    observeEvent(input$show_interactions_code, {
+      req()
+      int_code <- generate_interactions_code()
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(int_code),
+        easyClose = TRUE
+      ))
+    })
+
   })
 }

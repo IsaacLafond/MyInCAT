@@ -25,6 +25,8 @@ source("utils/kegg_code.R")
 source("utils/dot_plot_code.R")
 source("utils/vln_plot_code.R")
 source("utils/box_plot_code.R")
+source("utils/lr_code.R")
+source("utils/interactions_code.R")
 source("utils/choices.R")
 
 # App modules
@@ -263,7 +265,7 @@ server <- function(input, output, session) {
   mod_umap_server("umap", global_seurat_state)
   mod_deg_tab_server("deg_tab", global_seurat_state)
   mod_deg_plots_server("deg_plots", global_seurat_state)
-  mod_cellchat_tab_server("cellchat_tab", global_cellchat_state)
+  mod_cellchat_tab_server("cellchat_tab", global_cellchat_state, sidebar_data$cellchat)
 
 }
 
