@@ -347,18 +347,20 @@ mod_cellchat_plots_server <- function(id, cellchat_object, sidebar_selections) {
 
       idents_levels <- levels(x@idents)
       pathway_default <- x@netP$pathways[1]
+      idx_25 <- ceiling(length(idents_levels) * 0.25)
+      idx_50 <- ceiling(length(idents_levels) * 0.5)
 
       updatePickerInput(
         session,
         "circle_source_cells",
         choices = idents_levels,
-        selected = idents_levels
+        selected = idents_levels[1:idx_50]
       )
       updatePickerInput(
         session,
         "circle_target_cells",
         choices = idents_levels,
-        selected = idents_levels
+        selected = idents_levels[1:idx_50]
       )
 
       updatePickerInput(
@@ -371,19 +373,19 @@ mod_cellchat_plots_server <- function(id, cellchat_object, sidebar_selections) {
         session,
         "chord_source_cells",
         choices = idents_levels,
-        selected = idents_levels
+        selected = idents_levels[1:idx_25]
       )
       updatePickerInput(
         session,
         "chord_target_cells",
         choices = idents_levels,
-        selected = idents_levels
+        selected = idents_levels[1:idx_25]
       )
 
-      circle_src_on_close(idents_levels)
-      circle_tgt_on_close(idents_levels)
-      chord_src_on_close(idents_levels)
-      chord_tgt_on_close(idents_levels)
+      circle_src_on_close(idents_levels[1:idx_50])
+      circle_tgt_on_close(idents_levels[1:idx_50])
+      chord_src_on_close(idents_levels[1:idx_25])
+      chord_tgt_on_close(idents_levels[1:idx_25])
 
     })
 
@@ -543,6 +545,43 @@ mod_cellchat_plots_server <- function(id, cellchat_object, sidebar_selections) {
       }
     )
 
+    output$download_circle <- downloadHandler(
+      filename = function() {
+        paste0("cellchat_circle_plot_", Sys.Date(), ".png")
+      },
+      content = function(file) {
+        png(file, width = 2000, height = 2000, res = 300)
+        print(netVisual_circle(
+          cellchat_object()@net$count,
+          weight.scale = TRUE,
+          label.edge = input$circle_label_edge,
+          title.name = "Number of interactions",
+          arrow.size = 0.05,
+          sources.use = circle_src_on_close(),
+          targets.use = circle_tgt_on_close()
+        ))
+        dev.off()
+      }
+    )
+
+    output$download_chord <- downloadHandler(
+      filename = function() {
+        paste0("cellchat_chord_plot_", Sys.Date(), ".png")
+      },
+      content = function(file) {
+        png(file, width = 3000, height = 2000, res = 300)
+        print(netVisual_chord_gene(
+          cellchat_object(),
+          signaling = input$chord_pathway,
+          sources.use = chord_src_on_close(),
+          targets.use = chord_tgt_on_close(),
+          show.legend = TRUE,
+          lab.cex = 0.5
+        ))
+        dev.off()
+      }
+    )
+
     # Modals for code viewing
     observeEvent(input$show_heatmap_code, {
       req(
@@ -559,6 +598,50 @@ mod_cellchat_plots_server <- function(id, cellchat_object, sidebar_selections) {
         title = "Source Code",
         size = "xl",
         code_block(heatmap_code),
+        easyClose = TRUE
+      ))
+    })
+
+    observeEvent(input$show_circle_code, {
+      req(
+        sidebar_selections(),
+        circle_src_on_close(),
+        circle_tgt_on_close(),
+        !is.null(input$circle_label_edge)
+      )
+      circle_code <- generate_circle_code(
+        sidebar_selections,
+        input$circle_label_edge,
+        circle_src_on_close(),
+        circle_tgt_on_close()
+      )
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(circle_code),
+        easyClose = TRUE
+      ))
+    })
+
+    observeEvent(input$show_chord_code, {
+      req(
+        sidebar_selections(),
+        input$chord_pathway,
+        chord_src_on_close(),
+        chord_tgt_on_close()
+      )
+      chord_code <- generate_chord_code(
+        sidebar_selections,
+        input$chord_pathway,
+        chord_src_on_close(),
+        chord_tgt_on_close()
+      )
+
+      showModal(modalDialog(
+        title = "Source Code",
+        size = "xl",
+        code_block(chord_code),
         easyClose = TRUE
       ))
     })

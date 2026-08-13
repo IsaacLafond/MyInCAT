@@ -29,6 +29,8 @@ source("utils/lr_code.R")
 source("utils/interactions_code.R")
 source("utils/interaction_heatmap_code.R")
 source("utils/contribution_heatmap_code.R")
+source("utils/circle_code.R")
+source("utils/chord_code.R")
 source("utils/choices.R")
 
 # App modules
